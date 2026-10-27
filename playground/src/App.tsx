@@ -1,6 +1,7 @@
 import { Modal } from './components/Modal';
 import { Tabs } from './components/Tabs';
 import { Disclosure } from './components/Disclosure';
+import { Comparison } from './components/Comparison';
 import './styles.css';
 
 export default function App() {
@@ -12,7 +13,8 @@ export default function App() {
         <article className="pattern-card"><div className="card-heading"><span className="number">02</span><span className="pattern-label">ROVING FOCUS</span><span aria-hidden="true">↔</span></div><h3>One view at a time.</h3><p>Arrow keys move between tabs. Only the selected tab is part of the normal Tab sequence.</p><div className="interactive-preview"><Tabs label="Custom learning topics" items={[{ label: 'Overview', content: <><h4>Clarity comes first.</h4><p>Each tab controls one labelled panel. Focus and selection move together.</p></> }, { label: 'Keyboard', content: <><h4>Follow the arrows.</h4><p>Left and Right wrap around. Home selects the first; End selects the last.</p></> }, { label: 'Focus', content: <><h4>Keep your place.</h4><p>Press Tab to leave the tablist and focus this panel.</p></> }]}/></div><div className="key-hint"><kbd>←</kbd><kbd>→</kbd><kbd>Home</kbd><kbd>End</kbd></div></article>
         <article className="pattern-card"><div className="card-heading"><span className="number">03</span><span className="pattern-label">PROGRESSIVE DETAIL</span><span aria-hidden="true">＋</span></div><h3>A little more to discover.</h3><p>A real button reveals more information. Its expanded state stays in sync with the content.</p><div className="interactive-preview disclosure-preview"><Disclosure label="What makes this accessible?"><p>A native button handles Enter and Space. aria-expanded announces the current state; hidden content leaves the focus order.</p><a href="https://www.w3.org/WAI/ARIA/apg/patterns/disclosure/">Read the disclosure pattern ↗</a></Disclosure></div><div className="key-hint"><kbd>Enter</kbd><kbd>Space</kbd></div></article>
       </div></section>
-      <section className="comparison-note"><span aria-hidden="true">◈</span><div><h2>Build it. Read it. Compare it.</h2><p>The shadcn comparison is added after the custom components, so the implementations stay independent.</p></div><span className="course-pill">Source review</span></section>
+      <section className="comparison-note"><span aria-hidden="true">◈</span><div><h2>Build it. Read it. Compare it.</h2><p>The custom components were committed first. The generated shadcn source below shows the extra behavior a production primitive handles.</p></div><span className="course-pill">Source review</span></section>
+      <Comparison/>
       <footer><span>Built to understand, not just to render.</span><span>Standalone playground · Outside the capstone UI</span></footer>
     </main></>;
 }
