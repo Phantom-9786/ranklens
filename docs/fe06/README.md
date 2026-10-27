@@ -50,3 +50,7 @@ Audit data remains explicitly labelled as sample fixtures; the AI interaction is
 ## Production rollout
 
 The feature passed real-model checks on its protected branch preview before being fast-forwarded to codex/capstone-skeleton. Vercel production branch tracking and automatic domain assignment were verified. A fresh production-branch documentation commit triggers a distinct production rollout after the same feature commit was deployed on Preview; anonymous public endpoint verification is performed after it is Ready.
+
+## Public production verification completed
+
+Anonymous GET https://ranklens-beta.vercel.app/assistant returned HTTP 200. The committed smoke-stream.ps1 called the public POST /api/chat without browser cookies or credentials and observed HTTP 200, 33 text deltas, a finish event, first text at 4768ms and completion at 5427ms. The real response identified the missing sample meta descriptions as the highest-priority finding. This confirms public reviewer access and real Gemini streaming on Production, independently of the protected Preview browser session.
