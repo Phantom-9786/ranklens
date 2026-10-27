@@ -4,10 +4,11 @@ import { findings, audits } from './fixtures';
 
 /** One server-only home for prompt and model settings; extend here for FE-07. */
 export const AI_CONFIG = {
-  model: process.env.GOOGLE_AI_MODEL || 'gemini-2.5-flash',
+  model: process.env.GOOGLE_AI_MODEL || 'gemini-3.5-flash-lite',
   maxOutputTokens: 1600,
   timeoutMs: 45_000,
   streamDelayMs: 20, // Word-level pacing keeps fast provider chunks readable/stoppable.
+  thinkingLevel: 'minimal' as const, // Supported by the low-latency Flash-Lite default.
   maxMessages: 20,
   maxInputChars: 12_000,
 };

@@ -13,7 +13,7 @@ The RankLens conversation is available at `/assistant`; the server route is `src
 
 ## Configuration
 
-`GOOGLE_GENERATIVE_AI_API_KEY` is a Vercel secret scoped to Production and Preview. The owner entered the value; only the environment scope was inspected and adjusted. A redeploy is required after changing environment values/scopes. The default model is gemini-2.5-flash; GOOGLE_AI_MODEL is an optional server-side override.
+`GOOGLE_GENERATIVE_AI_API_KEY` is a Vercel secret scoped to Production and Preview. The owner entered the value; only the environment scope was inspected and adjusted. A redeploy is required after changing environment values/scopes. The default model is gemini-3.5-flash-lite; GOOGLE_AI_MODEL is an optional server-side override.
 
 ## Verification
 
