@@ -66,3 +66,77 @@ it('keeps a structured tool result while streaming its explanation and forwards 
   expect(sent.messages[1].parts[0].output.score).toBe(82);
   await act(async () => { second.emit({ type: 'finish' }); second.close(); });
 });
+
+it('preserves a reply cut mid-stream and retries only the failed message once even on double click', async () => {
+  const broken = testStream(); const recovered = testStream();
+  const fetchMock = vi.fn().mockResolvedValueOnce(broken.response).mockResolvedValueOnce(recovered.response); vi.stubGlobal('fetch', fetchMock);
+  render(<AuditChat configured/>); await ask('Explain the sample audit.');
+  await act(async () => { broken.emit({ type: 'text-delta', delta: 'Partial advice' }); broken.close(); });
+  expect(screen.getByText('Partial advice')).toBeInTheDocument();
+  expect(screen.getByRole('alert')).toHaveTextContent('before the response finished');
+  const retry = screen.getByRole('button', { name: /Retry this message/ });
+  fireEvent.click(retry); fireEvent.click(retry);
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  const sent = JSON.parse(fetchMock.mock.calls[1][1].body);
+  expect(sent.messages).toHaveLength(1); expect(sent.messages[0].parts[0].text).toBe('Explain the sample audit.');
+  await act(async () => { recovered.emit({ type: 'text-delta', delta: 'Complete fresh advice' }); recovered.emit({ type: 'finish' }); recovered.close(); });
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  expect(screen.getByText('Complete fresh advice')).toBeInTheDocument();
+  expect(screen.queryByText('Partial advice')).not.toBeInTheDocument();
+  expect(JSON.parse(localStorage.getItem(CHAT_STORAGE_KEY)!)).toHaveLength(2);
+});
+
+it('handles network failure before send, persists the retry target, and does not send blank input', async () => {
+  const fetchMock = vi.fn().mockRejectedValue(new TypeError('Failed to fetch')); vi.stubGlobal('fetch', fetchMock);
+  const { unmount } = render(<AuditChat configured/>);
+  expect(screen.getByRole('button', { name: /Send/ })).toBeDisabled();
+  fireEvent.change(screen.getByLabelText('Ask about the sample audit'), { target: { value: '   ' } });
+  fireEvent.submit(screen.getByLabelText('Ask about the sample audit').closest('form')!); expect(fetchMock).not.toHaveBeenCalled();
+  await ask('Why alt text?'); await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Check your internet connection'));
+  unmount(); render(<AuditChat configured/>);
+  expect(screen.getByRole('button', { name: /Retry this message/ })).toBeEnabled();
+  expect(screen.getByRole('alert')).toHaveTextContent('Why alt text?');
+});
+
+it('turns malformed tool data into a readable retry error without dumping schema internals', async () => {
+  const stream = new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new TextEncoder().encode('data: {"type":"tool-update","part":{"type":"tool-get_audit_report","state":"output-available","output":{"score":"invalid"}}}\n\n')); controller.close(); } });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } })));
+  render(<AuditChat configured/>); await ask('Show the report');
+  await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('report data was incomplete or invalid'));
+  expect(screen.getByRole('alert')).not.toHaveTextContent('Zod'); expect(screen.getByRole('button', { name: /Retry this message/ })).toBeEnabled();
+});
+
+it('offers useful examples on first run and fills the question without making a provider call', async () => {
+  const fetchMock = vi.fn(); vi.stubGlobal('fetch', fetchMock); render(<AuditChat configured/>);
+  await userEvent.click(screen.getByRole('button', { name: /Show the studio-north report/ }));
+  expect(screen.getByLabelText('Ask about the sample audit')).toHaveValue('Show the studio-north report.');
+  expect(fetchMock).not.toHaveBeenCalled(); expect(screen.getByRole('button', { name: /Send/ })).toBeEnabled();
+});
+
+it('shows slow-response guidance and a bounded timeout with retry', async () => {
+  vi.useFakeTimers();
+  try {
+    vi.stubGlobal('fetch', vi.fn((_url, init: RequestInit) => new Promise((_resolve, reject) => { init.signal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError'))); })));
+    render(<AuditChat configured/>);
+    fireEvent.change(screen.getByLabelText('Ask about the sample audit'), { target: { value: 'Explain this' } });
+    fireEvent.submit(screen.getByLabelText('Ask about the sample audit').closest('form')!);
+    await act(async () => vi.advanceTimersByTimeAsync(8000));
+    expect(screen.getByText(/Taking a little longer/)).toBeInTheDocument();
+    await act(async () => vi.advanceTimersByTimeAsync(47000));
+    expect(screen.getByRole('alert')).toHaveTextContent('took too long');
+    expect(screen.getByRole('button', { name: /Retry this message/ })).toBeEnabled();
+  } finally { vi.useRealTimers(); }
+});
+
+it('honors rate-limit retry timing without issuing automatic requests', async () => {
+  vi.useFakeTimers();
+  try {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: 'Rate limit' }), { status: 429, headers: { 'Content-Type': 'application/json', 'Retry-After': '2' } })); vi.stubGlobal('fetch', fetchMock);
+    render(<AuditChat configured/>);
+    fireEvent.change(screen.getByLabelText('Ask about the sample audit'), { target: { value: 'Explain this' } });
+    await act(async () => fireEvent.submit(screen.getByLabelText('Ask about the sample audit').closest('form')!));
+    expect(screen.getByRole('button', { name: /Retry in 2s/ })).toBeDisabled();
+    await act(async () => vi.advanceTimersByTimeAsync(2000));
+    expect(screen.getByRole('button', { name: /Retry this message/ })).toBeEnabled(); expect(fetchMock).toHaveBeenCalledTimes(1);
+  } finally { vi.useRealTimers(); }
+});

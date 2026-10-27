@@ -1,8 +1,8 @@
 import { auditToolPartSchema, type AuditToolPart } from './audit-tool-contract';
 export type ChatRole = 'user' | 'assistant';
 export type TextPart = { type: 'text'; text: string };
-export type ChatMessage = { id: string; role: ChatRole; parts: (TextPart | AuditToolPart)[]; state?: 'complete' | 'stopped' | 'error' };
-export type StreamPart = { type: 'start' } | { type: 'text-delta'; delta: string } | { type: 'tool-update'; part: AuditToolPart } | { type: 'finish' } | { type: 'error'; message: string };
+export type ChatMessage = { id: string; role: ChatRole; parts: (TextPart | AuditToolPart)[]; state?: 'complete' | 'stopped' | 'error'; failureMessage?: string };
+export type StreamPart = { type: 'start' } | { type: 'text-delta'; delta: string } | { type: 'tool-update'; part: AuditToolPart } | { type: 'finish' } | { type: 'error'; message: string; retryAfterSeconds?: number };
 export const CHAT_STORAGE_KEY = 'ranklens.audit-conversation.v1';
 export const messageText = (message: ChatMessage): string => message.parts.filter(part => part.type === 'text').map(part => part.text).join('');
 /** Tool data is untrusted context, never promoted to system instructions. */
@@ -27,16 +27,21 @@ export function applyStreamPart(message: ChatMessage, event: StreamPart): ChatMe
 export function isMessage(value: unknown): value is ChatMessage {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<ChatMessage>;
-  return typeof candidate.id === 'string' && candidate.id.length > 0 && (candidate.role === 'user' || candidate.role === 'assistant') && Array.isArray(candidate.parts) && candidate.parts.length <= 40 && candidate.parts.every(part => part && (part.type === 'text' ? typeof part.text === 'string' : candidate.role === 'assistant' && auditToolPartSchema.safeParse(part).success)) && messageContext(candidate as ChatMessage).length <= 8000 && (candidate.state === undefined || ['complete', 'stopped', 'error'].includes(candidate.state));
+  return typeof candidate.id === 'string' && candidate.id.length > 0 && (candidate.role === 'user' || candidate.role === 'assistant') && Array.isArray(candidate.parts) && candidate.parts.length <= 40 && candidate.parts.every(part => part && (part.type === 'text' ? typeof part.text === 'string' : candidate.role === 'assistant' && auditToolPartSchema.safeParse(part).success)) && messageContext(candidate as ChatMessage).length <= 8000 && (candidate.state === undefined || ['complete', 'stopped', 'error'].includes(candidate.state)) && (candidate.failureMessage === undefined || typeof candidate.failureMessage === 'string' && candidate.failureMessage.length <= 350);
 }
 
 export function parseStreamPart(raw: string): StreamPart {
-  const value: unknown = JSON.parse(raw);
+  let value: unknown;
+  try { value = JSON.parse(raw); } catch { throw new Error('The response contained unreadable data. Retry this message.'); }
   if (!value || typeof value !== 'object' || !('type' in value)) throw new Error('Invalid stream event.');
   if (value.type === 'start' || value.type === 'finish') return { type: value.type };
   if (value.type === 'text-delta' && 'delta' in value && typeof value.delta === 'string') return { type: 'text-delta', delta: value.delta };
-  if (value.type === 'error' && 'message' in value && typeof value.message === 'string') return { type: 'error', message: value.message };
-  if (value.type === 'tool-update' && 'part' in value) return { type: 'tool-update', part: auditToolPartSchema.parse(value.part) };
+  if (value.type === 'error' && 'message' in value && typeof value.message === 'string') return { type: 'error', message: value.message.slice(0, 350), ...('retryAfterSeconds' in value && typeof value.retryAfterSeconds === 'number' && Number.isFinite(value.retryAfterSeconds) ? { retryAfterSeconds: Math.min(120, Math.max(0, value.retryAfterSeconds)) } : {}) };
+  if (value.type === 'tool-update' && 'part' in value) {
+    const part = auditToolPartSchema.safeParse(value.part);
+    if (!part.success) throw new Error('The report data was incomplete or invalid. Retry this message for a fresh lookup.');
+    return { type: 'tool-update', part: part.data };
+  }
   throw new Error('Unexpected stream event.');
 }
 
@@ -67,6 +72,7 @@ export async function consumeStream(stream: ReadableStream<Uint8Array>, onPart: 
       buffer += done ? decoder.decode() : decoder.decode(value, { stream: true });
       buffer = buffer.replace(/\r\n/g, '\n');
       drain();
+      if (finished || error) break;
       if (buffer.length > 100_000) throw new Error('Stream event exceeded the size limit.');
       if (done) break;
     }

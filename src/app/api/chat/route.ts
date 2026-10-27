@@ -7,6 +7,7 @@ import { providerErrorMessage } from '@/lib/provider-error';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
+class ResponseProblem extends Error {}
 
 export async function POST(request: Request): Promise<Response> {
   const origin = request.headers.get('origin');
@@ -65,20 +66,24 @@ export async function POST(request: Request): Promise<Response> {
           }
           if (part.type === 'tool-result' && part.toolName === 'get_audit_report') {
             receivedText = true;
-            send({ type: 'tool-update', part: { type: 'tool-get_audit_report', toolCallId: part.toolCallId, state: 'output-available', input: auditInputSchema.parse(part.input), output: auditOutputSchema.parse(part.output) } });
+            const input = auditInputSchema.parse(part.input); const output = auditOutputSchema.safeParse(part.output);
+            send({ type: 'tool-update', part: output.success ? { type: 'tool-get_audit_report', toolCallId: part.toolCallId, state: 'output-available', input, output: output.data } : { type: 'tool-get_audit_report', toolCallId: part.toolCallId, state: 'output-error', input, errorText: 'The report returned incomplete data. Ask for the report again to retry the lookup.' } });
           }
           if (part.type === 'tool-error' && part.toolName === 'get_audit_report') {
             receivedText = true;
             const input = auditInputSchema.safeParse(part.input);
-            send({ type: 'tool-update', part: { type: 'tool-get_audit_report', toolCallId: part.toolCallId, state: 'output-error', input: input.success ? input.data : undefined, errorText: input.success ? 'That sample report could not be found. Choose studio-north, field-notes, or evergreen and try again.' : 'The report ID was invalid. Use a short ID containing lowercase letters and hyphens.' } });
+            const missing = part.error instanceof Error && part.error.message === 'REPORT_NOT_FOUND';
+            send({ type: 'tool-update', part: { type: 'tool-get_audit_report', toolCallId: part.toolCallId, state: 'output-error', input: input.success ? input.data : undefined, errorText: !input.success ? 'The report ID was invalid. Use a short ID containing lowercase letters and hyphens.' : missing ? 'That sample report could not be found. Choose studio-north, field-notes, or evergreen and try again.' : 'The report could not be loaded safely. Ask for this report again to retry the lookup.' } });
           }
+          if (part.type === 'finish' && part.finishReason === 'content-filter') throw new ResponseProblem('The model could not answer this request. Try rephrasing it as a question about a sample SEO report.');
         }
         if (abort.signal.aborted) throw new Error('Generation stopped');
-        if (!receivedText) throw new Error('Provider returned no text');
+        if (!receivedText) throw new ResponseProblem('No reply came back from the model. Retry this message or ask about one of the sample reports.');
         send({ type: 'finish' });
       } catch (cause) {
         if (!request.signal.aborted) {
-          try { send({ type: 'error', message: abort.signal.aborted ? 'The response timed out. Your partial response is preserved; try a shorter follow-up.' : providerErrorMessage(cause) }); } catch { /* Client disconnected. */ }
+          const message = abort.signal.aborted ? 'The response timed out. Your partial response is preserved; retry this message when ready.' : cause instanceof ResponseProblem ? cause.message : providerErrorMessage(cause);
+          try { send({ type: 'error', message, ...(message.includes('rate-limited') ? { retryAfterSeconds: 10 } : {}) }); } catch { /* Client disconnected. */ }
         }
       } finally {
         clearTimeout(timeout); request.signal.removeEventListener('abort', stop);

@@ -51,3 +51,36 @@ it('streams typed tool phases and handles execution failure without leaking erro
   expect(JSON.stringify(events)).not.toContain('private metadata');
   expect(mocks.streamText.mock.calls[0][0].tools.get_audit_report.execute).toBeTypeOf('function');
 });
+
+it('preserves deltas before an API failure and exposes a safe rate-limit wait hint', async () => {
+  mocks.streamText.mockReturnValue({ fullStream: (async function* () {
+    yield { type: 'text-delta', text: 'Received partial response.' };
+    throw { statusCode: 429, responseBody: 'private provider data' };
+  })() });
+  const response = await POST(req({ messages: [question] })); const events: StreamPart[] = [];
+  await consumeStream(response.body!, event => events.push(event));
+  expect(events[1]).toEqual({ type: 'text-delta', delta: 'Received partial response.' });
+  expect(events.at(-1)).toMatchObject({ type: 'error', retryAfterSeconds: 10 });
+  expect(JSON.stringify(events)).not.toContain('private provider data');
+  expect(events.some(event => event.type === 'finish')).toBe(false);
+});
+
+it('handles a synchronous route provider throw, an empty model response, and a safety refusal', async () => {
+  mocks.streamText.mockImplementationOnce(() => { throw new Error('sabotage route throw'); });
+  let response = await POST(req({ messages: [question] })); let events: StreamPart[] = [];
+  await consumeStream(response.body!, event => events.push(event)); expect(events.at(-1)?.type).toBe('error');
+  mocks.streamText.mockReturnValueOnce({ fullStream: (async function* () {})() });
+  response = await POST(req({ messages: [question] })); events = [];
+  await consumeStream(response.body!, event => events.push(event)); expect(events.at(-1)).toMatchObject({ type: 'error', message: expect.stringContaining('No reply came back') });
+  mocks.streamText.mockReturnValueOnce({ fullStream: (async function* () { yield { type: 'finish', finishReason: 'content-filter' }; })() });
+  response = await POST(req({ messages: [question] })); events = [];
+  await consumeStream(response.body!, event => events.push(event)); expect(events.at(-1)).toMatchObject({ type: 'error', message: expect.stringContaining('rephrasing') });
+});
+
+it('renders malformed tool output as a typed recovery error instead of breaking the stream', async () => {
+  mocks.streamText.mockReturnValueOnce({ fullStream: (async function* () { yield { type: 'tool-result', toolName: 'get_audit_report', toolCallId: 'bad', input: { auditId: 'studio-north' }, output: { score: 'invalid' } }; })() });
+  const response = await POST(req({ messages: [question] })); const events: StreamPart[] = [];
+  await consumeStream(response.body!, event => events.push(event));
+  expect(events[1]).toMatchObject({ type: 'tool-update', part: { state: 'output-error', errorText: expect.stringContaining('incomplete data') } });
+  expect(events.at(-1)).toEqual({ type: 'finish' });
+});

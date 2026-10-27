@@ -1,7 +1,7 @@
 name: Streaming audit checks
 on:
   push:
-    branches: [codex/streaming-audit-chat, codex/audit-tool-results]
+    branches: [codex/streaming-audit-chat, codex/audit-tool-results, codex/checkpoint-one]
   pull_request:
     paths: ['src/**', 'package.json', 'package-lock.json']
 permissions:

@@ -1,0 +1,3 @@
+export default function AssistantLoading() {
+  return <section className="chat-workspace" role="status" aria-label="Loading audit assistant"><div className="page-heading"><div><p className="eyebrow">YOUR AUDIT CONVERSATION</p><h1>Opening the assistant…</h1><p className="page-description">Getting your workspace ready.</p></div></div><div className="chat-main"><div className="chat-bar"><strong>RankLens assistant</strong></div><div className="chat-scroll"><div className="reply-skeleton" aria-hidden="true"><i/><i/><i/></div></div><div className="chat-composer"><p>Loading your conversation controls…</p></div></div></section>;
+}

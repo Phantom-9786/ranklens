@@ -61,3 +61,31 @@
 @keyframes tool-reveal { from { opacity: .3; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 600px) { .audit-tool header { padding: 12px; flex-wrap: wrap; } .tool-body { padding: 13px; } .tool-report-heading h3 { font-size: 15px; } .tool-score strong { font-size: 30px; } }
 @media (prefers-reduced-motion: reduce) { .audit-tool, .tool-body { transition: none; animation: none; } }
+/* FE-08: recovery and viewport-safe chat. */
+.chat-failure { background: #fbf5eb; border: 1px solid #e5d9c5; border-radius: 12px; padding: 16px; margin-bottom: 14px; color: #705b40; animation: tool-reveal 200ms ease-out; }
+.chat-failure > div { display: flex; align-items: center; gap: 10px; }
+.chat-failure > div > span { display: grid; place-items: center; width: 29px; height: 29px; border-radius: 50%; background: #eee2cf; font-size: 22px; flex-shrink: 0; }
+.chat-failure h2 { margin: 0; font-size: 17px; font-weight: 500; }
+.chat-failure p { margin: 10px 0; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.chat-failure .retry-question { padding: 9px 11px; background: #f3eadb; border-radius: 6px; max-height: 80px; overflow-y: auto; }
+.chat-failure .retry-hint { font-size: 12px; color: #817055; }
+.retry-button { border: 1px solid #a9926b; background: #fffdf8; border-radius: 7px; color: #685536; padding: 10px 15px; min-height: 44px; font-size: 13px; }
+.retry-button:disabled { opacity: .6; cursor: wait; }
+.chat-slow { padding: 10px 20px; margin: 0; background: #f0f4eb; color: #657957; font-size: 13px; border-top: 1px solid #e1e8d7; }
+.reply-pending { min-height: 108px; }
+.reply-skeleton { width: min(390px, 100%); padding-top: 10px; }
+.reply-skeleton i { display: block; height: 11px; background: #ecf0e7; border-radius: 6px; margin: 10px 0; animation: breathe 1.4s ease-in-out infinite; }
+.reply-skeleton i:nth-child(2) { width: 88%; }.reply-skeleton i:last-child { width: 62%; }
+.chat-scroll { height: min(55dvh, 560px); overflow-anchor: none; -webkit-overflow-scrolling: touch; }
+.chat-composer { padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+.chat-composer textarea { scroll-margin-block: 80px; }
+.chat-message .message-text { font-size: 15px; }
+.send-button, .stop-button, .chat-new { min-height: 44px; }
+.app-shell { min-height: 100dvh; }.sidebar { height: 100dvh; }
+@media(max-width:720px) {
+  .sidebar { height: auto; }.chat-scroll { height: clamp(180px, 44dvh, 460px); min-height: 180px; }
+  .chat-composer textarea { font-size: 16px; resize: none; }.chat-composer { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+  .chat-failure { padding: 13px; }.chat-failure h2 { font-size: 16px; }.chat-failure .retry-hint { font-size: 12px; }
+  .chat-new { white-space: normal; }.chat-bar { flex-wrap: wrap; }.chat-disclaimer { padding-inline: 2px; }
+}
+@media(prefers-reduced-motion:reduce) { .reply-skeleton i, .chat-failure { animation: none; } }

@@ -29,3 +29,10 @@ it('marks scroll-up as unpinned and tolerates the bottom threshold', () => {
   expect(nearBottom(650, 300, 1000)).toBe(true);
   expect(nearBottom(700, 300, 1000)).toBe(true);
 });
+
+it('stops on a terminal error even if the network never sends EOF', async () => {
+  let cancelled = false;
+  const stream = new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(encode('data: {"type":"error","message":"Try again"}\n\n')); }, cancel() { cancelled = true; } });
+  const parts: StreamPart[] = []; await consumeStream(stream, part => parts.push(part));
+  expect(parts).toEqual([{ type: 'error', message: 'Try again' }]); expect(cancelled).toBe(true);
+});
