@@ -4,6 +4,8 @@ An SEO audit dashboard capstone for small website owners. **FE-05: Next.js skele
 
 **Live app:** [ranklens-beta.vercel.app](https://ranklens-beta.vercel.app)
 
+**Streaming AI assistant:** [Open conversation](https://ranklens-beta.vercel.app/assistant) · [FE-06 implementation and live checks](docs/fe06/README.md)
+
 **Git-triggered branch preview:** [codex/deploy-check](https://ranklens-git-codex-deploy-check-event-ai-frontend.vercel.app)
 
 ## Run
