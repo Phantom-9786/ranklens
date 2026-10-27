@@ -2,7 +2,7 @@
 
 ## Goal and stage
 
-RankLens is a FlyRank Frontend AI Engineering capstone: an SEO audit dashboard for small website owners. FE-01 is documentation and toolchain setup only; there is no runnable app yet.
+RankLens is a FlyRank Frontend AI Engineering capstone: an SEO audit dashboard for small website owners. FE-01 is preserved on codex/ranklens-setup. FE-04 uses a standalone React workflow exercise in workflow-drill/.
 
 ## Planned stack
 
@@ -27,4 +27,4 @@ Start with fixture-based findings, severity filters, and an actionable report. L
 
 ## Current validation
 
-No package.json exists at this stage. Do not invent install, dev, build, or test commands. Validate repository files and commit history for FE-01.
+For the FE-04 exercise, run npm ci, npm run dev, npm run build, and npm test inside workflow-drill/. The common starter has a test harness but no feature tests yet. Do not claim an empty test run verifies behavior.
