@@ -33,9 +33,7 @@ The root application is Next.js. The separate workflow-drill/ directory preserve
 - `/health`: actual server-fetched public GitHub repository data with an error fallback.
 - `/api/health`: JSON status, returning HTTP 200 on a successful upstream fetch or 503 on failure.
 
-See [SPEC.md](SPEC.md) for the screen inventory and staged scope. All audit findings are fixtures, not real crawl results. AI explanations and real audit execution are future milestones.
-
-## Architecture
+See [SPEC.md](SPEC.md) for the screen inventory and staged scope. Audit findings are fixtures, not real crawl results. AI explanations and stored-report lookup are available; live audit execution remains a future milestone.
 
 ## FE-07: structured report lookup
 
@@ -49,11 +47,13 @@ The AI SDK chooses and executes the tool server-side and receives its result for
 
 Verification: `npm test` covers tool validation/lookup, all four card states, stable-card updates, storage validation, stream translation, failed execution, and existing chat regressions. `npm run build` compiles strict TypeScript. [FE-07 submission instructions](docs/fe07/SUBMISSION.md).
 
-Next.js 16 App Router, strict TypeScript, React 19, Tailwind CSS 4 and shared design tokens in src/app/globals.css. Layouts/pages render as Server Components. Active navigation and error recovery are the only Client Components at this stage.
+## Architecture
+
+Next.js 16 App Router, strict TypeScript, React 19, Tailwind CSS 4 and shared design tokens in src/app/globals.css. Layouts/pages render as Server Components. Navigation, error recovery, and streaming chat use Client Components; provider calls and tool execution remain on the server.
 
 ## Environment and secrets
 
-Copy .env.example to .env.local only when configuring overrides. No secret is required for this skeleton. NEXT_PUBLIC_APP_NAME is optional display text, never a secret. Real environment files, .next, .vercel, and node_modules are ignored. Future AI provider keys must stay server-only in the hosting environment.
+Copy .env.example to .env.local when configuring local overrides. The sample dashboard needs no secret; the assistant requires server-only GOOGLE_GENERATIVE_AI_API_KEY. NEXT_PUBLIC_APP_NAME is optional display text, never a secret. Real environment files, .next, .vercel, and node_modules are ignored. Set provider credentials in Vercel Production and Preview environments; never commit them or expose them to browser code.
 
 ## Deployment
 

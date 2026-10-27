@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, expect, it, vi } from 'vitest';
 import AuditChat from './audit-chat';
 import { CHAT_STORAGE_KEY, type StreamPart } from '@/lib/chat-protocol';
+import { executeAuditLookup } from '@/lib/audit-tools';
 
 function testStream() {
   let control: ReadableStreamDefaultController<Uint8Array>;
@@ -47,4 +48,21 @@ it('restores persisted text and does not pretend interrupted generation is runni
 });
 it('explains missing configuration and disables submission', () => {
   render(<AuditChat configured={false}/>); expect(screen.getByRole('alert')).toHaveTextContent('waiting for its AI connection'); expect(screen.getByRole('button', { name: /Send/ })).toBeDisabled();
+});
+
+it('keeps a structured tool result while streaming its explanation and forwards it in follow-up context', async () => {
+  const first = testStream(); const second = testStream();
+  const fetchMock = vi.fn().mockResolvedValueOnce(first.response).mockResolvedValueOnce(second.response); vi.stubGlobal('fetch', fetchMock);
+  render(<AuditChat configured/>); await ask('Show the studio-north report.');
+  const input = { auditId: 'studio-north' }; const output = await executeAuditLookup(input);
+  await act(async () => {
+    first.emit({ type: 'tool-update', part: { type: 'tool-get_audit_report', toolCallId: 't', state: 'output-available', input, output } });
+    first.emit({ type: 'text-delta', delta: 'Fix descriptions first.' });
+    first.emit({ type: 'finish' }); first.close();
+  });
+  expect(screen.getByText('82')).toBeInTheDocument(); expect(screen.getByText('Fix descriptions first.')).toBeInTheDocument();
+  await ask('Why that score?');
+  const sent = JSON.parse(fetchMock.mock.calls[1][1].body);
+  expect(sent.messages[1].parts[0].output.score).toBe(82);
+  await act(async () => { second.emit({ type: 'finish' }); second.close(); });
 });
