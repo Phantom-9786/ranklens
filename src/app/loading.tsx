@@ -1,0 +1,1 @@
+export default function Loading() { return <section className="panel empty-panel" role="status"><p className="eyebrow">BRINGING THINGS INTO FOCUS</p><h2>Loading your workspace…</h2><p>Getting the next view ready.</p></section>; }

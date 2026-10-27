@@ -1,0 +1,9 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import Navigation from '@/components/navigation';
+import './globals.css';
+
+export const metadata: Metadata = { title: { default: 'RankLens — A clearer view of your website', template: '%s | RankLens' }, description: 'An SEO audit dashboard capstone. FE-05 skeleton with clearly labelled sample findings and a live fetched-data health check.' };
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="en"><body><a className="skip-link" href="#main">Skip to content</a><div className="app-shell"><aside className="sidebar"><Link href="/" className="brand"><span aria-hidden="true" className="brand-symbol">r<span>↗</span></span>ranklens<span className="brand-period">.</span></Link><div className="workspace-switch"><span className="workspace-avatar">R</span><div><strong>Your workspace</strong><small>Capstone project</small></div><span aria-hidden="true">⌄</span></div><p className="nav-caption">WORKSPACE</p><Navigation/><div className="sidebar-bottom"><div className="sidebar-feature"><span aria-hidden="true">✳</span><h2>Good websites<br/>start with clarity.</h2><p>One finding. One improvement.<br/>A little better, every day.</p></div><div className="workspace-owner"><span className="owner-avatar">D</span><div><strong>Demo workspace</strong><small>Sample data · No account</small></div></div></div></aside><div className="main-shell"><header className="topbar"><span>Workspace <span className="topbar-divider">/</span><strong>SEO workspace</strong></span><span className="preview-label"><i/>Capstone preview</span></header><main id="main" className="page-content">{children}</main><footer className="app-footer"><span>See clearly. Improve thoughtfully.</span><span>RankLens · Capstone foundation</span></footer></div></div></body></html>;
+}

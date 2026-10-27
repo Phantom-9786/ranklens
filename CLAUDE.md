@@ -2,11 +2,11 @@
 
 ## Goal and stage
 
-RankLens is a FlyRank Frontend AI Engineering capstone: an SEO audit dashboard for small website owners. FE-01 is preserved on codex/ranklens-setup. FE-04 uses a standalone React workflow exercise in workflow-drill/.
+RankLens is a FlyRank Frontend AI Engineering capstone: an SEO audit dashboard for small website owners. The root application is the FE-05 Next.js skeleton on codex/capstone-skeleton. FE-01 and FE-04 are preserved on their submitted branches; workflow-drill/ holds the earlier exercise.
 
 ## Planned stack
 
-React, TypeScript (strict mode), Vite, standard CSS, Vitest, React Testing Library, and Playwright. Use npm and commit package-lock.json when scaffolding begins.
+Next.js App Router, React, TypeScript (strict mode), Tailwind CSS 4 and shared design tokens. Use npm with the committed root lockfile. Server Components by default; Client Components only for active navigation and error recovery. Future meaningful tests may use Vitest/Testing Library and Playwright.
 
 ## Development conventions
 
@@ -28,6 +28,8 @@ Start with fixture-based findings, severity filters, and an actionable report. L
 ## Current validation
 
 For the FE-04 exercise, run npm ci, npm run dev, npm run build, and npm test inside workflow-drill/. Round one contains 3 feature tests; round two contains 25. Do not claim an empty test run verifies behavior.
+
+For FE-05, run npm ci, npm run build and npm start at the repository root. Check every SPEC.md route and /api/health. Verify the layout at actual CSS widths 375px and 1280px. Keep .env.local, .vercel and .next ignored. No secret is required by the skeleton. Every fixture report must be labelled as sample data; new-audit controls remain disabled until connected functionality exists.
 
 ## Rules learned in FE-04
 

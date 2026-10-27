@@ -1,0 +1,86 @@
+[
+  {
+    "targetWidth": 375,
+    "path": "/",
+    "actualWidth": 375,
+    "heading": "A clearer view. A better website.",
+    "pageWidth": 359
+  },
+  {
+    "targetWidth": 375,
+    "path": "/audits",
+    "actualWidth": 375,
+    "heading": "Every website. One clear picture.",
+    "pageWidth": 359
+  },
+  {
+    "targetWidth": 375,
+    "path": "/audits/new",
+    "actualWidth": 375,
+    "heading": "Give your website a closer look.",
+    "pageWidth": 359
+  },
+  {
+    "targetWidth": 375,
+    "path": "/audits/studio-north",
+    "actualWidth": 375,
+    "heading": "studio-north.example",
+    "pageWidth": 359
+  },
+  {
+    "targetWidth": 375,
+    "path": "/settings",
+    "actualWidth": 375,
+    "heading": "A workspace with clear foundations.",
+    "pageWidth": 359
+  },
+  {
+    "targetWidth": 375,
+    "path": "/health",
+    "actualWidth": 375,
+    "heading": "Built on a healthy foundation.",
+    "pageWidth": 359
+  },
+  {
+    "targetWidth": 1280,
+    "path": "/",
+    "actualWidth": 1280,
+    "heading": "A clearer view. A better website.",
+    "pageWidth": 1264
+  },
+  {
+    "targetWidth": 1280,
+    "path": "/audits",
+    "actualWidth": 1280,
+    "heading": "Every website. One clear picture.",
+    "pageWidth": 1280
+  },
+  {
+    "targetWidth": 1280,
+    "path": "/audits/new",
+    "actualWidth": 1280,
+    "heading": "Give your website a closer look.",
+    "pageWidth": 1280
+  },
+  {
+    "targetWidth": 1280,
+    "path": "/audits/studio-north",
+    "actualWidth": 1280,
+    "heading": "studio-north.example",
+    "pageWidth": 1264
+  },
+  {
+    "targetWidth": 1280,
+    "path": "/settings",
+    "actualWidth": 1280,
+    "heading": "A workspace with clear foundations.",
+    "pageWidth": 1280
+  },
+  {
+    "targetWidth": 1280,
+    "path": "/health",
+    "actualWidth": 1280,
+    "heading": "Built on a healthy foundation.",
+    "pageWidth": 1280
+  }
+]
