@@ -1,6 +1,7 @@
 import { smoothStream, streamText } from 'ai';
 import { AI_CONFIG, AUDIT_SYSTEM_PROMPT, auditModel, modelConfigured } from '@/lib/ai-config';
 import { isMessage, messageText, type StreamPart } from '@/lib/chat-protocol';
+import { providerErrorMessage } from '@/lib/provider-error';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -45,15 +46,15 @@ export async function POST(request: Request): Promise<Response> {
         let receivedText = false;
         for await (const part of result.fullStream) {
           if (abort.signal.aborted) break;
-          if (part.type === 'error') throw new Error('Provider generation failed');
+          if (part.type === 'error') throw part.error;
           if (part.type === 'text-delta' && part.text) { receivedText = true; send({ type: 'text-delta', delta: part.text }); }
         }
         if (abort.signal.aborted) throw new Error('Generation stopped');
         if (!receivedText) throw new Error('Provider returned no text');
         send({ type: 'finish' });
-      } catch {
+      } catch (cause) {
         if (!request.signal.aborted) {
-          try { send({ type: 'error', message: abort.signal.aborted ? 'The response timed out. Your partial response is preserved; try a shorter follow-up.' : 'The AI provider could not complete this response. Please try again shortly.' }); } catch { /* Client disconnected. */ }
+          try { send({ type: 'error', message: abort.signal.aborted ? 'The response timed out. Your partial response is preserved; try a shorter follow-up.' : providerErrorMessage(cause) }); } catch { /* Client disconnected. */ }
         }
       } finally {
         clearTimeout(timeout); request.signal.removeEventListener('abort', stop);
