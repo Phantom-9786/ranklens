@@ -17,6 +17,8 @@ FE-05 delivers a deployed, routed Next.js foundation with labelled sample fixtur
 | New audit | `/audits/new` | Disabled configuration placeholder; no network crawl |
 | Report detail | `/audits/[id]` | Fixture report; unknown IDs return 404 |
 | Workspace settings | `/settings` | Read-only defaults; editor planned |
+| Audit assistant | `/assistant` | FE-06 live Gemini streaming conversation over fixture reports |
+| Conversation API | `/api/chat` | Server-only AI SDK streamText, typed SSE, abort and timeout |
 | System health | `/health` | Server-rendered public GitHub API data, failure fallback |
 | Health API | `/api/health` | Real JSON fetch result; 200 or 503 |
 

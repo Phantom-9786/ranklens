@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const items = [{ href: '/', label: 'Overview', icon: '◫' }, { href: '/audits', label: 'Website audits', icon: '◎' }, { href: '/settings', label: 'Settings', icon: '⚙' }, { href: '/health', label: 'System health', icon: '♡' }];
+const items = [{ href: '/', label: 'Overview', icon: '◫' }, { href: '/audits', label: 'Website audits', icon: '◎' }, { href: '/assistant', label: 'Audit assistant', icon: '✳' }, { href: '/settings', label: 'Settings', icon: '⚙' }, { href: '/health', label: 'System health', icon: '♡' }];
 export default function Navigation() {
   const pathname = usePathname();
   return <nav aria-label="Main navigation" className="navigation">{items.map(item => {

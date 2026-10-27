@@ -31,6 +31,8 @@ For the FE-04 exercise, run npm ci, npm run dev, npm run build, and npm test ins
 
 For FE-05, run npm ci, npm run build and npm start at the repository root. Check every SPEC.md route and /api/health. Verify the layout at actual CSS widths 375px and 1280px. Keep .env.local, .vercel and .next ignored. No secret is required by the skeleton. Every fixture report must be labelled as sample data; new-audit controls remain disabled until connected functionality exists.
 
+FE-06 adds /assistant and /api/chat. Run npm test and npm run build at root. AI config/prompt live in src/lib/ai-config.ts; GOOGLE_GENERATIVE_AI_API_KEY is server-only. Do not create a fake production model or stream fixture text as a real AI response. Stop must preserve partial text and allow an immediate new send; old request cleanup cannot reset a newer generation. Respect scroll-up while streaming and render incomplete model text as plain text rather than raw HTML/markdown. Protocol/provider mocks belong only in tests. Never print API keys or raw provider errors.
+
 ## Rules learned in FE-04
 
 - Audit website URLs must be trimmed and parsed with URL, allow only HTTP/HTTPS, require a hostname, and reject nonempty username/password; test credential-bearing and unsafe-scheme inputs.
