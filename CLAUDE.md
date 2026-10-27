@@ -27,4 +27,11 @@ Start with fixture-based findings, severity filters, and an actionable report. L
 
 ## Current validation
 
-For the FE-04 exercise, run npm ci, npm run dev, npm run build, and npm test inside workflow-drill/. The common starter has a test harness but no feature tests yet. Do not claim an empty test run verifies behavior.
+For the FE-04 exercise, run npm ci, npm run dev, npm run build, and npm test inside workflow-drill/. Round one contains 3 feature tests; round two contains 25. Do not claim an empty test run verifies behavior.
+
+## Rules learned in FE-04
+
+- Audit website URLs must be trimmed and parsed with URL, allow only HTTP/HTTPS, require a hostname, and reject nonempty username/password; test credential-bearing and unsafe-scheme inputs.
+- Persist audit preferences under a versioned key. Validate parsed storage field types and values before restoring; test corrupt JSON, blocked reads, and failed writes. Failed writes must never display success.
+- Maximum pages must be an integer from 1 through 500. Test blank, 0, 501, fractional, and both boundary values before accepting settings changes.
+- Invalid settings fields must expose aria-invalid and reference their inline error via aria-describedby; submission must focus the first invalid field. Test focus and error association, and clear stale success when any setting changes.

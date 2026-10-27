@@ -15,13 +15,28 @@ Website owners need a clear way to understand SEO issues and decide which fixes 
 
 ## Status
 
-FE-01: repository and AI-assisted development workflow setup. Application scaffolding and deployment will follow in the capstone skeleton assignment.
+FE-04: two runnable, independently generated audit-settings forms on separate branches. FE-01 remains preserved on `codex/ranklens-setup`. The main capstone dashboard and deployment will follow in later assignments.
 
 ## Getting started
 
 Clone this repository and open it in your editor. Read [CLAUDE.md](CLAUDE.md) for the planned stack and development conventions.
 
-This setup stage contains documentation only: there is no `package.json`, no dependency installation step, and no development server yet. Node.js and Git are installed and checked; their recorded versions are in the [FE-01 submission guide](docs/fe-01-submission.md). Runnable setup commands will be added alongside the application scaffold.
+Select `codex/workflow-vague` or `codex/workflow-precise`, then run:
+
+```sh
+cd workflow-drill
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite. Run `npm test` for feature tests and `npm run build` for the TypeScript check and production build. Node.js 24 was used. The form saves settings in this browser only; it does not crawl websites or run an audit.
+
+## FE-04 workflow comparison
+
+- [Vague branch](https://github.com/Phantom-9786/ranklens/tree/codex/workflow-vague): original one-sentence prompt output, 3 tests.
+- [Precise branch](https://github.com/Phantom-9786/ranklens/tree/codex/workflow-precise): explicit requirements, guarded persistence, accessible validation, 25 tests.
+- [WORKFLOW.md](WORKFLOW.md): 422-word comparison citing concrete diffs and an AI mistake caught in review.
+- [Evidence and reproduction](docs/fe04/README.md): exact prompts, session records, commands, timing limits, and comparison instructions.
 
 ## Planned MVP acceptance criteria
 

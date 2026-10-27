@@ -1,0 +1,257 @@
+diff --git a/workflow-drill/src/App.css b/workflow-drill/src/App.css
+new file mode 100644
+index 0000000..1227332
+--- /dev/null
++++ b/workflow-drill/src/App.css
+@@ -0,0 +1 @@
++:root{font-family:Inter,Segoe UI,sans-serif;color:#203d32;background:#f6f7f2;font-synthesis:none;line-height:1.5}*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}.app-shell{min-height:100vh;display:grid;grid-template-columns:252px 1fr}.sidebar{background:#123d31;color:#edf6ef;padding:36px 26px;display:flex;flex-direction:column;min-height:100vh}.brand{font-size:25px;font-weight:750;display:flex;align-items:center;gap:10px;letter-spacing:-1px}.brand-icon{display:grid;place-items:center;background:#c9ed9a;color:#143e30;width:36px;height:36px;border-radius:10px;font-size:23px}.tagline{font-size:12px;color:#b8cfc0;margin:18px 0 54px}.nav-label{font-size:10px;letter-spacing:1.8px;color:#a5c3b2}.active-link{display:flex;gap:12px;align-items:center;background:#2a5143;border:1px solid #456854;border-radius:8px;padding:12px;margin-top:15px;font-size:14px}.sidebar-note{margin-top:auto;padding-top:90px;font-size:10px;letter-spacing:1.2px;color:#b6d7a1}.sidebar-note p{font-size:22px;line-height:1.5;letter-spacing:-.5px;color:#e2eee3}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#b6d7a1;margin-right:7px}main{min-width:0}.topbar{border-bottom:1px solid #e0e5db;padding:23px 42px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#607366}.topbar span span{margin:0 12px;color:#aab6ac}.demo-badge{border:1px solid #d5dfce;border-radius:30px;padding:5px 12px;color:#4c684c;font-size:11px}.content{max-width:830px;padding:48px 42px 24px;margin:auto}.eyebrow{font-size:10px;font-weight:700;letter-spacing:1.8px;color:#597943;margin:0 0 12px}h1{font-size:34px;line-height:1.2;letter-spacing:-1.2px;margin:0 0 14px}.intro{color:#68786d;font-size:14px;max-width:560px;margin-bottom:32px}.settings-card{background:#fff;border:1px solid #dde4d8;border-radius:14px;box-shadow:0 6px 24px #1d412805;overflow:hidden}.card-heading{display:flex;gap:15px;padding:26px 30px;border-bottom:1px solid #e7ebe2}.section-icon{font-size:28px;background:#f0f5e9;color:#52733a;border-radius:10px;width:46px;height:46px;text-align:center}h2{font-size:18px;margin:0;letter-spacing:-.4px}.card-heading p{margin:3px 0 0;font-size:12px;color:#6d7e70}form{padding:28px 30px}.field{margin-bottom:25px}label{display:block;font-size:13px;font-weight:650}.hint{font-size:12px;color:#68796d;margin:5px 0 10px}input:not([type=checkbox]){font:inherit;font-size:14px;width:100%;border:1px solid #bdcabc;border-radius:7px;padding:12px 14px;background:#fff;color:#234032}.pages-field input{max-width:180px}input[aria-invalid=true]{border-color:#ac4435}input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #7ba954;outline-offset:3px}.checkbox-field{display:flex;gap:12px;align-items:flex-start;margin:5px 0 26px}.checkbox-field input{margin:3px 0 0;width:17px;height:17px;accent-color:#2c6542}.checkbox-field .hint{margin-bottom:0}.demo-note{border-radius:7px;background:#f3f6ec;padding:14px 16px;font-size:12px;color:#536a48}.demo-note p{margin:3px 0 0;font-size:12px}.form-footer{border-top:1px solid #e8ece3;margin-top:25px;padding-top:22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.form-footer>span{font-size:11px;color:#778575}button{border:0;background:#23573c;color:#fff;border-radius:7px;font:inherit;font-size:13px;font-weight:600;padding:12px 19px;cursor:pointer}button:hover{background:#17462d}button span{margin-left:20px}.error{color:#a03628;font-size:12px;margin:8px 0 0}.feedback{padding:12px;border-radius:6px}.success{background:#edf6e8;color:#275a35;font-size:13px}.feedback.error{background:#fff0eb}.footer-note{text-align:center;color:#7c8b79;font-size:11px;margin-top:25px}@media(max-width:760px){.app-shell{display:block}.sidebar{min-height:auto;padding:20px 24px;display:block}.brand{font-size:22px}.tagline,.sidebar-note,.nav-label{display:none}.active-link{margin-top:18px;padding:8px 12px}.topbar{padding:16px 24px}.content{padding:32px 20px}h1{font-size:29px}.card-heading{padding:22px}form{padding:22px}.form-footer{align-items:flex-start;flex-direction:column}button{width:100%}.demo-badge{display:none}}
+diff --git a/workflow-drill/src/App.test.tsx b/workflow-drill/src/App.test.tsx
+index a5b4d79..a94d330 100644
+--- a/workflow-drill/src/App.test.tsx
++++ b/workflow-drill/src/App.test.tsx
+@@ -1,37 +1,95 @@
+-import { render, screen } from '@testing-library/react';
+-import userEvent from '@testing-library/user-event';
+-import { afterEach, expect, it, vi } from 'vitest';
+-import App from './App';
++import { fireEvent, render, screen } from '@testing-library/react';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++import App, { STORAGE_KEY } from './App';
+ 
+-afterEach(() => { localStorage.clear(); vi.restoreAllMocks(); });
++beforeEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
++const save = () => fireEvent.click(screen.getByRole('button', { name: /save settings/i }));
++const url = () => screen.getByLabelText('Website URL');
++const pages = () => screen.getByLabelText('Maximum pages');
+ 
+-it('rejects invalid URLs and focuses the website field', async () => {
+-  const user = userEvent.setup(); render(<App />);
+-  await user.type(screen.getByLabelText(/Website URL/), 'javascript:alert(1)');
+-  await user.click(screen.getByRole('button', { name: /Save settings/ }));
+-  expect(screen.getByRole('alert')).toHaveTextContent('Enter a complete website URL');
+-  expect(screen.getByLabelText(/Website URL/)).toHaveFocus();
+-  expect(localStorage.getItem('ranklens-audit-settings')).toBeNull();
+-});
+-
+-it('saves selected settings and clears the success message after editing', async () => {
+-  const user = userEvent.setup(); render(<App />);
+-  await user.type(screen.getByLabelText(/Website URL/), 'https://example.com');
+-  await user.selectOptions(screen.getByLabelText('Page limit'), '25');
+-  await user.selectOptions(screen.getByLabelText('Audit frequency'), 'weekly');
+-  await user.click(screen.getByLabelText(/Broken links/));
+-  await user.click(screen.getByRole('button', { name: /Save settings/ }));
+-  expect(JSON.parse(localStorage.getItem('ranklens-audit-settings')!)).toEqual({ website: 'https://example.com', limit: '25', frequency: 'weekly', mobile: true, links: false });
+-  expect(screen.getByRole('status')).toHaveTextContent('No audit has been started');
+-  await user.selectOptions(screen.getByLabelText('Page limit'), '500');
+-  expect(screen.getByRole('status')).toBeEmptyDOMElement();
+-});
+-
+-it('reports storage failure without claiming success', async () => {
+-  vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('storage unavailable'); });
+-  const user = userEvent.setup(); render(<App />);
+-  await user.type(screen.getByLabelText(/Website URL/), 'https://example.com');
+-  await user.click(screen.getByRole('button', { name: /Save settings/ }));
+-  expect(screen.getByRole('alert')).toHaveTextContent('could not save settings');
+-  expect(screen.getByRole('status')).toBeEmptyDOMElement();
++describe('audit settings', () => {
++  it('shows defaults and persists all controlled settings with a trimmed URL', () => {
++    render(<App />);
++    expect(url()).toHaveValue('https://example.com');
++    expect(pages()).toHaveValue(50);
++    expect(screen.getByLabelText('Include subdomains')).not.toBeChecked();
++    fireEvent.change(url(), { target: { value: ' https://example.com/docs ' } });
++    fireEvent.click(screen.getByLabelText('Include subdomains'));
++    save();
++    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)).toEqual({ websiteUrl: 'https://example.com/docs', maxPages: 50, includeSubdomains: true });
++    expect(screen.getByRole('status')).toHaveTextContent('No audit was run');
++  });
++  it.each(['ftp://example.com', 'https://user:pass@example.com', 'https://user@example.com', 'invalid', 'https://'])('rejects unsafe or invalid URL %s and focuses it', value => {
++    render(<App />);
++    fireEvent.change(url(), { target: { value } });
++    save();
++    expect(url()).toHaveAttribute('aria-invalid', 'true');
++    expect(url()).toHaveAttribute('aria-describedby', 'url-hint url-error');
++    expect(url()).toHaveFocus();
++    expect(screen.getByRole('alert')).toHaveTextContent('HTTP or HTTPS');
++    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
++  });
++  it.each(['', '0', '501', '1.5'])('rejects page value %s with accessible error and focus', value => {
++    render(<App />);
++    fireEvent.change(pages(), { target: { value } });
++    save();
++    expect(pages()).toHaveAttribute('aria-invalid', 'true');
++    expect(pages()).toHaveAttribute('aria-describedby', 'pages-hint pages-error');
++    expect(pages()).toHaveFocus();
++    expect(screen.getByRole('alert')).toHaveTextContent('whole number');
++  });
++  it.each(['1', '500'])('accepts page boundary %s and URL paths', value => {
++    render(<App />);
++    fireEvent.change(url(), { target: { value: 'https://example.com/docs' } });
++    fireEvent.change(pages(), { target: { value } });
++    save();
++    expect(screen.getByRole('status')).toBeInTheDocument();
++  });
++  it('focuses URL first when both fields are invalid', () => {
++    render(<App />);
++    fireEvent.change(url(), { target: { value: 'ftp://example.com' } });
++    fireEvent.change(pages(), { target: { value: '0' } });
++    save();
++    expect(screen.getAllByRole('alert')).toHaveLength(2);
++    expect(url()).toHaveFocus();
++  });
++  it('restores validated persisted preferences', () => {
++    localStorage.setItem(STORAGE_KEY, JSON.stringify({ websiteUrl: 'http://example.org/path', maxPages: 500, includeSubdomains: true }));
++    render(<App />);
++    expect(url()).toHaveValue('http://example.org/path');
++    expect(pages()).toHaveValue(500);
++    expect(screen.getByLabelText('Include subdomains')).toBeChecked();
++    expect(screen.queryByRole('status')).not.toBeInTheDocument();
++  });
++  it.each(['{broken', 'null', '[]', '{"websiteUrl":"ftp://example.com","maxPages":50,"includeSubdomains":false}', '{"websiteUrl":"https://example.com","maxPages":0,"includeSubdomains":false}', '{"websiteUrl":"https://example.com","maxPages":"50","includeSubdomains":false}'])('recovers from malformed storage %s', raw => {
++    localStorage.setItem(STORAGE_KEY, raw);
++    render(<App />);
++    expect(url()).toHaveValue('https://example.com');
++    expect(pages()).toHaveValue(50);
++  });
++  it('remains usable when reading storage throws', () => {
++    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
++    render(<App />);
++    expect(pages()).toHaveValue(50);
++    save();
++    expect(screen.getByRole('status')).toBeInTheDocument();
++  });
++  it('reports failed writes without stale success and clears failure on edit', () => {
++    render(<App />);
++    save();
++    expect(screen.getByRole('status')).toBeInTheDocument();
++    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('quota'); });
++    save();
++    expect(screen.queryByRole('status')).not.toBeInTheDocument();
++    expect(screen.getByRole('alert')).toHaveTextContent('could not be saved');
++    fireEvent.change(pages(), { target: { value: '40' } });
++    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
++  });
++  it.each(['url', 'pages', 'subdomains'])('clears success when editing %s', field => {
++    render(<App />);
++    save();
++    if (field === 'subdomains') fireEvent.click(screen.getByLabelText('Include subdomains'));
++    else fireEvent.change(field === 'url' ? url() : pages(), { target: { value: field === 'url' ? 'http://example.org' : '42' } });
++    expect(screen.queryByRole('status')).not.toBeInTheDocument();
++  });
+ });
+diff --git a/workflow-drill/src/App.tsx b/workflow-drill/src/App.tsx
+index f8cba17..6d99947 100644
+--- a/workflow-drill/src/App.tsx
++++ b/workflow-drill/src/App.tsx
+@@ -1,44 +1,67 @@
+-import { useState, type FormEvent } from 'react';
+-import './styles.css';
++import { useRef, useState, type FormEvent } from 'react';
++import './App.css';
++
++export const STORAGE_KEY = 'ranklens.audit-settings.v1';
++type Settings = { websiteUrl: string; maxPages: number; includeSubdomains: boolean };
++type Errors = { websiteUrl?: string; maxPages?: string };
++const defaults: Settings = { websiteUrl: 'https://example.com', maxPages: 50, includeSubdomains: false };
++
++function validate(websiteUrl: string, maxPages: string): Errors {
++  const errors: Errors = {};
++  try {
++    const url = new URL(websiteUrl.trim());
++    if (!['http:', 'https:'].includes(url.protocol) || !url.hostname || url.username || url.password) throw new Error();
++  } catch { errors.websiteUrl = 'Enter an HTTP or HTTPS website URL without a username or password.'; }
++  if (!maxPages.trim() || !Number.isInteger(Number(maxPages)) || Number(maxPages) < 1 || Number(maxPages) > 500) {
++    errors.maxPages = 'Enter a whole number from 1 to 500.';
++  }
++  return errors;
++}
++
++function restore(): Settings {
++  try {
++    const raw = localStorage.getItem(STORAGE_KEY);
++    if (!raw) return defaults;
++    const value: unknown = JSON.parse(raw);
++    if (typeof value !== 'object' || value === null) return defaults;
++    const candidate = value as Partial<Settings>;
++    if (typeof candidate.websiteUrl !== 'string' || typeof candidate.maxPages !== 'number' || typeof candidate.includeSubdomains !== 'boolean') return defaults;
++    if (Object.keys(validate(candidate.websiteUrl, String(candidate.maxPages))).length) return defaults;
++    return { websiteUrl: candidate.websiteUrl.trim(), maxPages: candidate.maxPages, includeSubdomains: candidate.includeSubdomains };
++  } catch { return defaults; }
++}
+ 
+ export default function App() {
+-  const [website, setWebsite] = useState('');
+-  const [limit, setLimit] = useState('100');
+-  const [frequency, setFrequency] = useState('manual');
+-  const [mobile, setMobile] = useState(true);
+-  const [links, setLinks] = useState(true);
+-  const [error, setError] = useState('');
+-  const [status, setStatus] = useState('');
+-  function save(event: FormEvent<HTMLFormElement>) {
++  const [initial] = useState(restore);
++  const [websiteUrl, setWebsiteUrl] = useState(initial.websiteUrl);
++  const [maxPages, setMaxPages] = useState(String(initial.maxPages));
++  const [includeSubdomains, setIncludeSubdomains] = useState(initial.includeSubdomains);
++  const [errors, setErrors] = useState<Errors>({});
++  const [feedback, setFeedback] = useState<'saved' | 'failed' | null>(null);
++  const urlRef = useRef<HTMLInputElement>(null);
++  const pagesRef = useRef<HTMLInputElement>(null);
++  function edited() { setFeedback(null); setErrors({}); }
++  function submit(event: FormEvent<HTMLFormElement>) {
+     event.preventDefault();
+-    setStatus('');
+-    try {
+-      const url = new URL(website);
+-      if (!['https:', 'http:'].includes(url.protocol) || !url.hostname.includes('.')) throw new Error();
+-    } catch {
+-      setError('Enter a complete website URL, such as https://example.com.');
+-      document.getElementById('website')?.focus();
+-      return;
+-    }
++    setFeedback(null);
++    const nextErrors = validate(websiteUrl, maxPages);
++    setErrors(nextErrors);
++    if (nextErrors.websiteUrl) { urlRef.current?.focus(); return; }
++    if (nextErrors.maxPages) { pagesRef.current?.focus(); return; }
+     try {
+-      localStorage.setItem('ranklens-audit-settings', JSON.stringify({ website, limit, frequency, mobile, links }));
+-      setError(''); setStatus('Settings saved in this browser. No audit has been started.');
+-    } catch { setError('Your browser could not save settings. Allow local storage and try again.'); }
++      localStorage.setItem(STORAGE_KEY, JSON.stringify({ websiteUrl: websiteUrl.trim(), maxPages: Number(maxPages), includeSubdomains } satisfies Settings));
++      setWebsiteUrl(websiteUrl.trim());
++      setFeedback('saved');
++    } catch { setFeedback('failed'); }
+   }
+-  return <div className="shell">
+-    <header><a href="#main" className="brand"><span>R</span>RankLens</a><small>WORKSPACE</small></header>
+-    <main id="main"><p className="eyebrow">YOUR WEBSITE, IN FOCUS</p><h1>Audit settings</h1><p className="intro">Set the scope for a clearer picture of your website’s SEO.</p>
+-      <div className="layout"><form onSubmit={save} onChange={() => { setStatus(''); setError(''); }} noValidate>
+-        <section><div className="section-heading"><span className="step">01</span><div><h2>Website & scope</h2><p>Choose where your audit begins.</p></div></div>
+-          <label htmlFor="website">Website URL <small>Required</small></label><input id="website" type="url" required placeholder="https://example.com" value={website} onChange={event => setWebsite(event.target.value)} aria-describedby="website-help" aria-invalid={error.startsWith('Enter')}/><p id="website-help" className="help">Include http:// or https://. Use a website you own or manage.</p>
+-          <div className="fields"><div><label htmlFor="limit">Page limit</label><select id="limit" value={limit} onChange={event => setLimit(event.target.value)}><option value="25">25 pages</option><option value="100">100 pages</option><option value="500">500 pages</option></select></div><div><label htmlFor="frequency">Audit frequency</label><select id="frequency" value={frequency} onChange={event => setFrequency(event.target.value)}><option value="manual">Manual</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div></div>
+-        </section>
+-        <section><div className="section-heading"><span className="step">02</span><div><h2>What to check</h2><p>Make your next audit work for you.</p></div></div>
+-          <label className="check"><input type="checkbox" checked={mobile} onChange={event => setMobile(event.target.checked)}/><span>Mobile friendliness<small>Review how pages work on smaller screens.</small></span></label>
+-          <label className="check"><input type="checkbox" checked={links} onChange={event => setLinks(event.target.checked)}/><span>Broken links<small>Find links that lead visitors to a dead end.</small></span></label>
+-        </section>
+-        <footer><div><p role="alert" className="error">{error}</p><p role="status" className="success">{status}</p></div><button type="submit">Save settings <span aria-hidden="true">↗</span></button></footer>
+-      </form><aside><span className="aside-icon" aria-hidden="true">◎</span><h2>A little setup.<br/>A lot more clarity.</h2><p>Start with a focused audit, then expand your scope as your website grows.</p><hr/><p className="note"><strong>Local demo</strong>Settings are saved only in this browser. Scheduling and website crawling are not connected.</p></aside></div>
+-    </main><div className="bottom-note">RANKLENS <span>Make every page count.</span></div>
++  return <div className="app-shell">
++    <aside className="sidebar"><a className="brand" href="#settings"><span className="brand-icon" aria-hidden="true">R</span>RankLens</a><p className="tagline">A clearer view of your website.</p><nav aria-label="Workspace"><span className="nav-label">WORKSPACE</span><a className="active-link" href="#settings" aria-current="page"><span aria-hidden="true">⚙</span> Audit settings</a></nav><div className="sidebar-note"><span className="dot" />SETTINGS DEMO<p>Small changes.<br />Better foundations.</p></div></aside>
++    <main id="settings"><header className="topbar"><span>Workspace <span aria-hidden="true">/</span> <strong>Audit settings</strong></span><span className="demo-badge">Demo workspace</span></header><div className="content"><p className="eyebrow">CONFIGURE YOUR WORKSPACE</p><h1>Start with the right scope.</h1><p className="intro">Set your website and page limit. A focused scope is the first step toward a healthier website.</p>
++    <section className="settings-card" aria-labelledby="form-title"><div className="card-heading"><span className="section-icon" aria-hidden="true">◎</span><div><h2 id="form-title">Audit settings</h2><p>Your preferences, saved on this browser.</p></div></div>
++    <form onSubmit={submit} noValidate><div className="field"><label htmlFor="website-url">Website URL</label><p id="url-hint" className="hint">Use the full HTTP or HTTPS address you want to configure.</p><input ref={urlRef} id="website-url" type="url" autoComplete="url" value={websiteUrl} onChange={e => { edited(); setWebsiteUrl(e.target.value); }} aria-invalid={Boolean(errors.websiteUrl)} aria-describedby={`url-hint${errors.websiteUrl ? ' url-error' : ''}`} />{errors.websiteUrl && <p className="error" id="url-error" role="alert">{errors.websiteUrl}</p>}</div>
++    <div className="field pages-field"><label htmlFor="max-pages">Maximum pages</label><p id="pages-hint" className="hint">Choose a whole number between 1 and 500.</p><input ref={pagesRef} id="max-pages" type="number" min="1" max="500" step="1" value={maxPages} onChange={e => { edited(); setMaxPages(e.target.value); }} aria-invalid={Boolean(errors.maxPages)} aria-describedby={`pages-hint${errors.maxPages ? ' pages-error' : ''}`} />{errors.maxPages && <p className="error" id="pages-error" role="alert">{errors.maxPages}</p>}</div>
++    <div className="checkbox-field"><input id="subdomains" type="checkbox" checked={includeSubdomains} onChange={e => { edited(); setIncludeSubdomains(e.target.checked); }} aria-describedby="subdomains-hint" /><div><label htmlFor="subdomains">Include subdomains</label><p id="subdomains-hint" className="hint">Include addresses such as blog.example.com in your scope.</p></div></div>
++    <div className="demo-note"><strong>Settings-only demo</strong><p>Saving stores preferences locally. It does not crawl your website or run a real SEO audit.</p></div><div className="form-footer"><span>Stored on this device only</span><button type="submit">Save settings <span aria-hidden="true">→</span></button></div>
++    {feedback === 'saved' && <p className="feedback success" role="status">Settings saved on this browser. No audit was run.</p>}{feedback === 'failed' && <p className="feedback error" role="alert">Settings could not be saved. Browser storage is unavailable. Please try again.</p>}</form></section><p className="footer-note">Thoughtful scope. Clearer insights.</p></div></main>
+   </div>;
+ }
+diff --git a/workflow-drill/src/styles.css b/workflow-drill/src/styles.css
+deleted file mode 100644
+index 030eebe..0000000
+--- a/workflow-drill/src/styles.css
++++ /dev/null
+@@ -1 +0,0 @@
+-:root{font-family:Inter,system-ui,sans-serif;color:#183c36;background:#f5f6f1;font-synthesis:none}*{box-sizing:border-box}body{margin:0}.shell{max-width:1200px;margin:auto;padding:0 52px}header{display:flex;align-items:center;gap:24px;height:100px;border-bottom:1px solid #dce2d8}.brand{display:flex;align-items:center;gap:10px;font-size:23px;font-weight:700;letter-spacing:-1px;color:inherit;text-decoration:none}.brand span{display:grid;place-items:center;background:#214e42;color:#e8f4bc;width:31px;height:34px;border-radius:9px;font-size:22px}header small{font-size:10px;letter-spacing:1.6px;color:#738077;border-left:1px solid #cdd5cb;padding-left:23px}main{padding:57px 0 64px}.eyebrow{font-size:11px;letter-spacing:2px;font-weight:700;color:#6b7a62;margin:0 0 15px}h1{font-size:44px;letter-spacing:-1.7px;margin:0 0 12px;font-weight:600}.intro{color:#6a7971;font-size:15px;margin:0 0 36px}.layout{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(230px,1fr);gap:28px}form{background:white;border:1px solid #dce2d8;border-radius:14px;overflow:hidden}section{padding:30px 32px}section+section{border-top:1px solid #e8ebe5}.section-heading{display:flex;gap:14px;align-items:flex-start;margin-bottom:27px}.step{border:1px solid #d7dfcf;border-radius:50%;font-size:10px;padding:7px;color:#69815b}h2{font-size:18px;margin:0 0 6px;font-weight:600;letter-spacing:-.3px}.section-heading p{font-size:13px;color:#667468;margin:0}label{display:block;font-size:13px;font-weight:600;margin-bottom:9px}label>small{color:#667261;font-size:10px;font-weight:400;margin-left:6px}input[type=url],select{font:inherit;font-size:14px;width:100%;height:45px;border:1px solid #b7c3b3;border-radius:6px;background:#fff;padding:0 12px;color:#29443b}input::placeholder{color:#737e70}.help{font-size:11px;color:#667261;margin:9px 0 24px;line-height:1.6}.fields{display:grid;grid-template-columns:1fr 1fr;gap:18px}.check{display:flex;gap:12px;align-items:flex-start;padding:13px 0;margin:0;font-weight:500}.check input{accent-color:#325e48;width:17px;height:17px;margin:0;flex-shrink:0}.check small{display:block;color:#667261;font-size:12px;font-weight:400;margin-top:5px}footer{padding:21px 32px;border-top:1px solid #e8ebe5;display:flex;align-items:center;gap:18px;justify-content:space-between;background:#fcfdf9}button{white-space:nowrap;cursor:pointer;background:#254e3e;border:0;border-radius:6px;color:white;font:inherit;font-size:13px;padding:13px 18px}button span{margin-left:18px}button:hover{background:#34634e}:focus-visible{outline:3px solid #87aa4f;outline-offset:3px}.error,.success{font-size:12px;line-height:1.5;margin:0}.error{color:#a33d28}.success{color:#315e38}aside{align-self:start;background:#e9eddf;border:1px solid #dfe5d4;border-radius:14px;padding:30px 27px}.aside-icon{display:grid;place-items:center;background:#dae3c8;width:45px;height:45px;border-radius:12px;font-size:30px;color:#4f6c36;margin-bottom:24px}aside h2{font-size:23px;line-height:1.35;letter-spacing:-.7px}aside p{color:#5e6c53;font-size:13px;line-height:1.8;margin:17px 0 25px}hr{border:0;border-top:1px solid #c4cfb7}aside .note{font-size:11px;margin-bottom:0}.note strong{display:block;color:#405b36;margin-bottom:4px}.bottom-note{display:flex;justify-content:space-between;border-top:1px solid #dce2d8;padding:23px 0;font-size:10px;letter-spacing:1.5px;color:#667261}.bottom-note span{letter-spacing:0;font-size:11px}@media(max-width:760px){.shell{padding:0 22px}header{height:78px}main{padding:34px 0}h1{font-size:36px}.layout{grid-template-columns:1fr}section{padding:25px 22px}footer{padding:20px 22px;align-items:flex-start;flex-direction:column}footer button{align-self:flex-end}.fields{grid-template-columns:1fr}aside h2 br{display:none}aside{padding:24px}.aside-icon{margin-bottom:16px}}
