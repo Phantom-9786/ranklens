@@ -26,6 +26,8 @@ The root application is Next.js. The separate workflow-drill/ directory preserve
 - `/audits/new`: clearly disabled audit-configuration placeholder.
 - `/audits/[id]`: sample report detail; unknown identifiers return 404.
 - `/settings`: read-only workspace settings placeholder.
+- `/assistant`: FE-06 streaming Gemini conversation explaining the sample audit reports.
+- `/api/chat`: server-only AI SDK streamText and typed SSE response.
 - `/health`: actual server-fetched public GitHub repository data with an error fallback.
 - `/api/health`: JSON status, returning HTTP 200 on a successful upstream fetch or 503 on failure.
 
