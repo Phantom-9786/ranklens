@@ -45,7 +45,8 @@ export async function POST(request: Request): Promise<Response> {
       try {
         if (request.signal.aborted) abort.abort();
         send({ type: 'start' });
-        const result = streamText({ model: auditModel(), system: AUDIT_SYSTEM_PROMPT, messages: messages.map(message => ({ role: message.role, content: messageContext(message) })), tools: auditTools, stopWhen: stepCountIs(3), maxOutputTokens: AI_CONFIG.maxOutputTokens, maxRetries: 0, abortSignal: abort.signal, experimental_transform: smoothStream({ delayInMs: AI_CONFIG.streamDelayMs, chunking: 'word' }), providerOptions: { google: { thinkingConfig: { thinkingLevel: AI_CONFIG.thinkingLevel } } }, onError: () => { /* Return a safe UI error below, never raw provider metadata. */ } });
+        // A report card is a complete answer. Avoid a second provider round trip merely to repeat it.
+        const result = streamText({ model: auditModel(), system: AUDIT_SYSTEM_PROMPT, messages: messages.map(message => ({ role: message.role, content: messageContext(message) })), tools: auditTools, stopWhen: stepCountIs(1), maxOutputTokens: AI_CONFIG.maxOutputTokens, maxRetries: 0, abortSignal: abort.signal, experimental_transform: smoothStream({ delayInMs: AI_CONFIG.streamDelayMs, chunking: 'word' }), providerOptions: { google: { thinkingConfig: { thinkingLevel: AI_CONFIG.thinkingLevel } } }, onError: () => { /* Return a safe UI error below, never raw provider metadata. */ } });
         let receivedText = false;
         const inputText = new Map<string, string>();
         for await (const part of result.fullStream) {

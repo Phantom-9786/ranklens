@@ -1,6 +1,6 @@
 # Checkpoint 1: primary-flow failure inventory
 
-Primary flow: open /assistant → ask about a stored sample report → server-side Gemini tool lookup → structured report card and streamed explanation → follow-up. The model connection is real; report data is explicitly sample data.
+Primary flow: open /assistant → ask about a stored sample report → server-side Gemini tool lookup → structured report card → streamed explanatory follow-up. The model connection is real; report data is explicitly sample data. Sabotage revealed that a redundant second model round trip after rendering the card could timeout, so report lookup now completes in one step; a follow-up receives that tool result as context.
 
 | Case | Deliberate behavior | Verification |
 | --- | --- | --- |

@@ -20,7 +20,11 @@ const server = createServer(async (request, response) => {
     const body = Buffer.concat(chunks);
     if (url.pathname === '/api/chat' && armed) {
       armed = false;
-      if (mode === 'network') { request.socket.destroy(); return; }
+      if (mode === 'network') {
+        // Flush headers before dropping the connection so the browser cannot silently retry the POST.
+        response.writeHead(200, { 'Content-Type': 'text/event-stream; charset=utf-8' }); response.flushHeaders();
+        await wait(100); response.destroy(); return;
+      }
       if (mode === 'rate-limit') {
         response.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '8' });
         response.end(JSON.stringify({ error: 'Local sabotage: injected HTTP 429.' })); return;
