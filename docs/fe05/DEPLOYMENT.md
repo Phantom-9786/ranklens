@@ -16,7 +16,7 @@ Import Phantom-9786/ranklens, production branch codex/capstone-skeleton, framewo
 
 ## Deployment evidence
 
-Deployment and Git-push preview verification are pending until a real Vercel result is observed. This record will be updated with the actual URL and build result. Never submit localhost as the live preview URL.
+Production deployment and Git-push preview automation have both been observed successfully. Use the URLs below; never submit localhost as the live preview URL.
 
 ## Initial production deployment observed
 
@@ -24,4 +24,18 @@ On 27 October 2026, Vercel reported “Deployed to Production” for the existin
 
 The owner completed GitHub and Vercel email verification. Only RankLens was added to the existing selected-repositories GitHub App installation, preserving the prior EventAI selection.
 
-This documentation change is pushed on codex/deploy-check to verify a real Git-triggered preview. Its result will be recorded after Vercel reports a successful build.
+The documentation change was pushed on codex/deploy-check to verify a real Git-triggered preview. Vercel automatically built commit b69b72d and reported Ready in the Preview environment in 12 seconds. No manual redeploy was used for this check.
+
+## Verified URLs and automation
+
+- Public stable app: https://ranklens-beta.vercel.app
+- Git-connected branch preview: https://ranklens-git-codex-deploy-check-event-ai-frontend.vercel.app
+- Immutable preview deployment: https://ranklens-cxpy55z2y-event-ai-frontend.vercel.app
+- Preview build details: https://vercel.com/event-ai-frontend/ranklens/CGHKCPGb6HuW1ZLgGhk2DmuNMMHg
+- GitHub commit status: Vercel success, “Deployment has completed”, for b69b72d.
+- GitHub Actions build also passed: https://github.com/Phantom-9786/ranklens/actions/runs/40494726414
+- Anonymous requests to both the stable app and branch preview returned HTTP 200; no access protection setting was changed.
+
+Live overview, audit library, new-audit placeholder, sample report, settings, health page, and health API returned HTTP 200. Unknown report returned 404. The live health API returned ok:true and real Phantom-9786/ranklens fields. One transient transport reset while checking settings was retried successfully.
+
+Vercel displayed two non-blocking warnings from its npm cache-dir environment option, once during installation and once during build. The application compiled successfully; there were no build errors and the dependency audit reported zero vulnerabilities.

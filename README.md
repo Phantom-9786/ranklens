@@ -2,6 +2,10 @@
 
 An SEO audit dashboard capstone for small website owners. **FE-05: Next.js skeleton** with routed screens, labelled sample reports, a server-fetched health page, and Tailwind design tokens.
 
+**Live app:** [ranklens-beta.vercel.app](https://ranklens-beta.vercel.app)
+
+**Git-triggered branch preview:** [codex/deploy-check](https://ranklens-git-codex-deploy-check-event-ai-frontend.vercel.app)
+
 ## Run
 
 Node.js 24 was used. From the repository root:
@@ -39,7 +43,7 @@ Copy .env.example to .env.local only when configuring overrides. No secret is re
 
 Vercel settings: Framework **Next.js**, Root Directory **./**, Install **npm ci**, Build **npm run build**. Connect the existing Phantom-9786/ranklens GitHub repository and select codex/capstone-skeleton as the production branch. Other pushed branches should receive Git-connected previews.
 
-[Deployment and verification record](docs/fe05/DEPLOYMENT.md) records what is verified and what remains to be checked. A configured Vercel file alone is not proof of a successful deployment or preview automation.
+[Deployment and verification record](docs/fe05/DEPLOYMENT.md) records the successful production deployment, live route checks, and an automatically built preview after pushing codex/deploy-check. Both the stable app and preview returned HTTP 200 without authentication. [Submission text](docs/fe05/SUBMISSION.md) is included for the assignment portal.
 
 ## Earlier submissions
 
