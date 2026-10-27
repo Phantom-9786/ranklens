@@ -17,3 +17,11 @@ Import Phantom-9786/ranklens, production branch codex/capstone-skeleton, framewo
 ## Deployment evidence
 
 Deployment and Git-push preview verification are pending until a real Vercel result is observed. This record will be updated with the actual URL and build result. Never submit localhost as the live preview URL.
+
+## Initial production deployment observed
+
+On 27 October 2026, Vercel reported “Deployed to Production” for the existing GitHub repository and codex/capstone-skeleton branch. Public domain: https://ranklens-beta.vercel.app . Initial immutable deployment: https://ranklens-r22ps04lb-event-ai-frontend.vercel.app . Framework Next.js, root ./, npm ci, npm run build. NEXT_PUBLIC_APP_NAME=RankLens was configured for Production and Preview; this is display text, not a credential.
+
+The owner completed GitHub and Vercel email verification. Only RankLens was added to the existing selected-repositories GitHub App installation, preserving the prior EventAI selection.
+
+This documentation change is pushed on codex/deploy-check to verify a real Git-triggered preview. Its result will be recorded after Vercel reports a successful build.
