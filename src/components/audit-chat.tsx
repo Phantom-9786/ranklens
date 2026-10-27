@@ -1,9 +1,10 @@
 'use client';
 import { useEffect, useRef, useState, type FormEvent, type UIEvent } from 'react';
-import { CHAT_STORAGE_KEY, consumeStream, isMessage, messageText, nearBottom, type ChatMessage } from '@/lib/chat-protocol';
+import { CHAT_STORAGE_KEY, consumeStream, isMessage, messageContext, applyStreamPart, nearBottom, type ChatMessage } from '@/lib/chat-protocol';
+import AuditToolCard from './audit-tool-card';
 
 type Generation = 'idle' | 'thinking' | 'streaming';
-const starters = ['Summarize the sample audit findings.', 'Which issue should I fix first?', 'Explain alt text in simple terms.'];
+const starters = ['Show the studio-north report.', 'Show the field-notes report.', 'Look up the missing-report report.'];
 
 export default function AuditChat({ configured }: { configured: boolean }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -69,8 +70,8 @@ export default function AuditChat({ configured }: { configured: boolean }) {
     const text = draft.trim();
     if (text.length > 2000) { setError('Keep each question within 2,000 characters.'); return; }
     const user: ChatMessage = { id: crypto.randomUUID(), role: 'user', parts: [{ type: 'text', text }], state: 'complete' };
-    const history = [...messages.filter(message => messageText(message).trim() && message.state !== 'error'), user];
-    if (history.length > 20 || history.reduce((sum, message) => sum + messageText(message).length, 0) > 12_000) { setError('This conversation has reached its limit. Start a new conversation to continue.'); return; }
+    const history = [...messages.filter(message => messageContext(message).trim() && message.state !== 'error'), user];
+    if (history.length > 20 || history.reduce((sum, message) => sum + messageContext(message).length, 0) > 12_000) { setError('This conversation has reached its limit. Start a new conversation to continue.'); return; }
     const id = crypto.randomUUID();
     const controller = new AbortController();
     controllerRef.current = controller; activeId.current = id; busyRef.current = true;
@@ -86,9 +87,9 @@ export default function AuditChat({ configured }: { configured: boolean }) {
       if (!response.body || !response.headers.get('content-type')?.includes('text/event-stream')) throw new Error('The server returned an unexpected response.');
       await consumeStream(response.body, part => {
         if (!mounted.current || controller.signal.aborted) return;
-        if (part.type === 'text-delta' && part.delta) {
+        if (part.type === 'text-delta' || part.type === 'tool-update') {
           // Text and indicator transition in one React batch: no empty frame.
-          setMessages(current => current.map(message => message.id === id ? { ...message, parts: [{ type: 'text', text: messageText(message) + part.delta }] } : message));
+          setMessages(current => current.map(message => message.id === id ? applyStreamPart(message, part) : message));
           setGeneration('streaming');
         } else if (part.type === 'error') { failed = true; setError(part.message); mark(id, 'error'); }
         else if (part.type === 'finish') mark(id, 'complete');
@@ -118,7 +119,7 @@ export default function AuditChat({ configured }: { configured: boolean }) {
     <div className="chat-layout"><div className="chat-main"><div className="chat-bar"><div><span className="chat-assistant-icon" aria-hidden="true">✳</span><div><strong>RankLens assistant</strong><small>{busy ? 'Working through your question' : 'Here to bring a little clarity'}</small></div></div><span className="pill">AI · Sample reports</span></div>
       <div className="chat-scroll" ref={scrollRef} onScroll={onScroll} onWheel={event => { if (event.deltaY < 0) unpin(); }} onTouchStart={unpin} onKeyDown={event => { if (['ArrowUp', 'PageUp', 'Home'].includes(event.key)) unpin(); }} tabIndex={0} aria-label="Conversation messages">
         {!messages.length && <div className="chat-welcome"><span aria-hidden="true">✳</span><h2>From findings to understanding.</h2><p>Ask what to fix first, why a finding matters, or how to make a practical improvement.</p><div>{starters.map(question => <button key={question} disabled={!configured || busy} onClick={() => { setDraft(question); inputRef.current?.focus(); }}>{question}<span aria-hidden="true">↗</span></button>)}</div></div>}
-        {messages.map((message, index) => <article key={message.id} className={`chat-message ${message.role}`} aria-label={`${message.role === 'user' ? 'You' : 'Assistant'}, message ${index + 1}`}><span className="message-avatar" aria-hidden="true">{message.role === 'user' ? 'Y' : '✳'}</span><div><div className="message-label">{message.role === 'user' ? 'You' : 'RankLens'}{message.state === 'stopped' && <small>Stopped</small>}{message.state === 'error' && <small>Incomplete</small>}</div>{messageText(message) ? <p className="message-text">{messageText(message)}</p> : busy && index === messages.length - 1 ? <p className="thinking"><span aria-hidden="true">● ● ●</span>Thinking through your audit…</p> : <p className="message-empty">{message.state === 'stopped' ? 'Stopped before the first text arrived.' : 'No response text received. Try another question.'}</p>}</div></article>)}
+        {messages.map((message, index) => <article key={message.id} className={`chat-message ${message.role}`} aria-label={`${message.role === 'user' ? 'You' : 'Assistant'}, message ${index + 1}`}><span className="message-avatar" aria-hidden="true">{message.role === 'user' ? 'Y' : '✳'}</span><div><div className="message-label">{message.role === 'user' ? 'You' : 'RankLens'}{message.state === 'stopped' && <small>Stopped</small>}{message.state === 'error' && <small>Incomplete</small>}</div>{message.parts.map((part, partIndex) => part.type === 'text' ? <p className="message-text" key={partIndex}>{part.text}</p> : <AuditToolCard key={part.toolCallId} part={part} interrupted={message.state === 'stopped' || message.state === 'error'}/>)}{message.parts.length ? null : busy && index === messages.length - 1 ? <p className="thinking"><span aria-hidden="true">● ● ●</span>Thinking through your audit…</p> : <p className="message-empty">{message.state === 'stopped' ? 'Stopped before the first text arrived.' : 'No response text received. Try another question.'}</p>}</div></article>)}
       </div>
       {jumpVisible && <button className="jump-latest" onClick={() => { pinRef.current = true; if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight; setJumpVisible(false); }}>Jump to latest ↓</button>}
       <div className="chat-composer">{!configured && <p className="chat-error" role="alert">The assistant is waiting for its AI connection. It will be ready after the workspace owner finishes setup.</p>}{error && <p className="chat-error" role="alert">{error}</p>}{storageWarning && <p className="chat-storage" role="status">{storageWarning}</p>}

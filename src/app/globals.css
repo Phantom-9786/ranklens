@@ -23,3 +23,41 @@
 @media(max-width:1150px){.chat-layout{grid-template-columns:minmax(0,1fr)}.chat-context{display:none}.chat-scroll{height:52vh}.chat-welcome{margin-top:10px}.chat-workspace .page-heading{flex-wrap:wrap}}
 @media(max-width:720px){.chat-workspace .page-heading{display:block}.chat-new{margin-top:17px}.chat-scroll{height:48vh;min-height:290px;padding:20px 15px}.chat-bar{padding:15px}.chat-bar .pill{font-size:9px}.chat-bar small{font-size:10px}.chat-welcome h2{font-size:22px}.chat-welcome>p{font-size:13px}.chat-composer{padding:12px}.chat-composer textarea{font-size:16px}.composer-bottom>span{font-size:9px;max-width:150px}.message-text{font-size:14px}.chat-disclaimer{font-size:10px}.chat-message{gap:9px}.chat-bar strong{font-size:12px}.chat-assistant-icon{width:30px;height:30px}.jump-latest{bottom:220px}.navigation{gap:3px}}
 @media(prefers-reduced-motion:reduce){.thinking>span{animation:none}}
+/* FE-07: one persistent tool card, distinct phases, readable structured results. */
+.chat-message > div { min-width: 0; }
+.audit-tool { margin: 14px 0; max-width: 620px; border: 1px solid #d8e0d2; border-radius: 16px; overflow: hidden; background: #fafcf7; transition: background-color 200ms, border-color 200ms; }
+.audit-tool header { display: flex; align-items: center; gap: 9px; padding: 14px 18px; background: #edf2e7; font-size: 14px; }
+.audit-tool header > span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #dce7d1; }
+.audit-tool header small { margin-left: auto; font-size: 12px; }
+.tool-body { padding: 18px; animation: tool-reveal 200ms ease-out; }
+.tool-body h3 { margin: 0 0 9px; font-size: 18px; overflow-wrap: anywhere; }
+.tool-body p { font-size: 14px; line-height: 1.6; margin: 8px 0; }
+.tool-id { display: inline-block; padding: 3px 8px; background: #e8eddf; border-radius: 6px; font-family: monospace; overflow-wrap: anywhere; }
+.tool-skeleton i { display: block; height: 12px; border-radius: 6px; margin-top: 12px; background: #e7ecdf; width: 85%; }
+.tool-skeleton i:last-child { width: 55%; }
+.audit-tool.input-streaming { border-style: dashed; }
+.audit-tool.input-available { border-color: #acba93; background: #f5f7ee; }
+.audit-tool.output-error { border-color: #d7b5a6; background: #fff8f3; }
+.audit-tool.output-error header { background: #f6e6dc; color: #813f2c; }
+.audit-tool.output-error header > span { background: #ecd1c2; }
+.tool-recovery { padding: 10px; border-radius: 8px; background: #f7eade; }
+.tool-report-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.tool-report-heading small { font-size: 10px; letter-spacing: .06em; color: #65775a; }
+.tool-report-heading h3 { margin-top: 6px; }
+.tool-score { display: flex; align-items: baseline; gap: 4px; color: #48613e; white-space: nowrap; }
+.tool-score strong { font-size: 38px; font-weight: 500; }
+.tool-score span { font-size: 12px; }
+.tool-metrics { display: flex; gap: 24px; border-block: 1px solid #e0e6d8; margin: 12px 0 18px; padding: 5px 0; }
+.tool-body h4 { font-size: 15px; margin: 0; }
+.tool-body .tool-caption { font-size: 12px; color: #68775e; }
+.tool-findings { list-style: none; margin: 0; padding: 0; }
+.tool-findings li { padding: 14px 0; border-bottom: 1px solid #e1e7d9; }
+.tool-findings li:last-child { border: 0; padding-bottom: 0; }
+.tool-findings li > div { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.tool-findings strong { font-size: 14px; }
+.tool-findings small { font-size: 11px; color: #6b7860; }
+.tool-severity { font-size: 10px; padding: 3px 7px; border-radius: 4px; background: #eee9ce; color: #6b5a26; }
+.tool-severity.high { background: #f2dfd3; color: #894e32; }
+@keyframes tool-reveal { from { opacity: .3; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 600px) { .audit-tool header { padding: 12px; flex-wrap: wrap; } .tool-body { padding: 13px; } .tool-report-heading h3 { font-size: 15px; } .tool-score strong { font-size: 30px; } }
+@media (prefers-reduced-motion: reduce) { .audit-tool, .tool-body { transition: none; animation: none; } }

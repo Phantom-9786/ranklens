@@ -1,9 +1,10 @@
 import { beforeEach, expect, it, vi } from 'vitest';
 const mocks = vi.hoisted(() => ({ configured: true, streamText: vi.fn() }));
-vi.mock('ai', () => ({ streamText: mocks.streamText, smoothStream: () => undefined }));
+vi.mock('ai', async importOriginal => ({ ...await importOriginal<typeof import('ai')>(), streamText: mocks.streamText, smoothStream: () => undefined }));
 vi.mock('@/lib/ai-config', () => ({ AI_CONFIG: { maxMessages: 20, maxInputChars: 12_000, timeoutMs: 45_000, maxOutputTokens: 1600 }, AUDIT_SYSTEM_PROMPT: 'Test instructions', auditModel: () => 'test-model', modelConfigured: () => mocks.configured }));
 import { POST } from './route';
 import { consumeStream, type StreamPart } from '@/lib/chat-protocol';
+import { executeAuditLookup } from '@/lib/audit-tools';
 const question = { id: 'u1', role: 'user', parts: [{ type: 'text', text: 'Explain the findings.' }] };
 const req = (body: unknown, origin?: string) => new Request('http://localhost/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(origin ? { Origin: origin } : {}) }, body: JSON.stringify(body) });
 beforeEach(() => { mocks.configured = true; mocks.streamText.mockReset(); });
@@ -32,4 +33,21 @@ it('turns SDK stream errors into safe typed errors, never an empty success', asy
   const response = await POST(req({ messages: [question] })); const parts: StreamPart[] = [];
   await consumeStream(response.body!, part => parts.push(part));
   expect(parts.some(part => part.type === 'error')).toBe(true); expect(parts.some(part => part.type === 'finish')).toBe(false); expect(JSON.stringify(parts)).not.toContain('secret');
+});
+
+it('streams typed tool phases and handles execution failure without leaking errors or crashing', async () => {
+  const input = { auditId: 'studio-north' }; const output = await executeAuditLookup(input);
+  mocks.streamText.mockReturnValue({ fullStream: (async function* () {
+    yield { type: 'tool-input-start', id: 't1', toolName: 'get_audit_report' };
+    yield { type: 'tool-input-delta', id: 't1', delta: '{"auditId":"studio-north"}' };
+    yield { type: 'tool-call', toolCallId: 't1', toolName: 'get_audit_report', input };
+    yield { type: 'tool-result', toolCallId: 't1', toolName: 'get_audit_report', input, output };
+    yield { type: 'tool-error', toolCallId: 't2', toolName: 'get_audit_report', input: { auditId: 'missing-report' }, error: new Error('private metadata') };
+  })() });
+  const response = await POST(req({ messages: [question] })); const events: StreamPart[] = [];
+  await consumeStream(response.body!, event => events.push(event));
+  expect(events.filter(event => event.type === 'tool-update').map(event => event.part.state)).toEqual(['input-streaming', 'input-streaming', 'input-available', 'output-available', 'output-error']);
+  expect(events.at(-1)).toEqual({ type: 'finish' });
+  expect(JSON.stringify(events)).not.toContain('private metadata');
+  expect(mocks.streamText.mock.calls[0][0].tools.get_audit_report.execute).toBeTypeOf('function');
 });

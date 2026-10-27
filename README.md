@@ -37,6 +37,18 @@ See [SPEC.md](SPEC.md) for the screen inventory and staged scope. All audit find
 
 ## Architecture
 
+## FE-07: structured report lookup
+
+Live demo: https://ranklens-beta.vercel.app/assistant . Ask “Show the studio-north report” for a successful tool call, or “Look up the missing-report report” for a real failed lookup and recovery card.
+
+Tool definition: [src/lib/audit-tools.ts](src/lib/audit-tools.ts). The server-only `get_audit_report` tool has a Zod `inputSchema` and an `execute` function. Input: `{ auditId: string }`, 1–64 lowercase letters, digits, or hyphens. Available IDs: `studio-north`, `field-notes`, `evergreen`. Unknown IDs throw `REPORT_NOT_FOUND`; no live website fetch occurs.
+
+Return shape: `{ id: string, domain: string, score: number (0–100), pages: positive integer, issues: nonnegative integer, sample: true, findings: Array<{ title: string, detail: string, severity: 'High' | 'Medium' | 'Low', count: nonnegative integer, category: string }> }`. Shared finding examples are illustrative, not an exhaustive breakdown of each report total. Both input and output are runtime validated. [Browser-safe schemas and discriminated tool parts](src/lib/audit-tool-contract.ts) stay separate from server execution.
+
+The AI SDK chooses and executes the tool server-side and receives its result for a follow-up explanation (maximum three generation steps). Typed SSE events update one stable card by call ID: dashed request skeleton (`input-streaming`), validated ID/loading panel (`input-available`), score and findings component (`output-available`), warm error panel with valid IDs and recovery instructions (`output-error`). A 200ms entrance and color transition respect reduced-motion preferences. Fast in-memory lookups can make intermediate states brief; they are driven by real SDK events, never fake timers. Stop interrupts the stream and labels unfinished lookups as interrupted. Browser history validates tool parts; successful results are included as untrusted conversation context for follow-ups. This read-only tool needs no action confirmation.
+
+Verification: `npm test` covers tool validation/lookup, all four card states, stable-card updates, storage validation, stream translation, failed execution, and existing chat regressions. `npm run build` compiles strict TypeScript. [FE-07 submission instructions](docs/fe07/SUBMISSION.md).
+
 Next.js 16 App Router, strict TypeScript, React 19, Tailwind CSS 4 and shared design tokens in src/app/globals.css. Layouts/pages render as Server Components. Active navigation and error recovery are the only Client Components at this stage.
 
 ## Environment and secrets
