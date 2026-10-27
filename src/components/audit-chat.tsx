@@ -1,14 +1,16 @@
 'use client';
 import { useEffect, useRef, useState, type FormEvent, type UIEvent } from 'react';
-import { CHAT_STORAGE_KEY, consumeStream, isMessage, messageContext, applyStreamPart, nearBottom, type ChatMessage } from '@/lib/chat-protocol';
+import { CHAT_STORAGE_KEY, isMessage, messageContext, applyStreamPart, nearBottom, type ChatMessage } from '@/lib/chat-protocol';
 import AuditToolCard from './audit-tool-card';
-import { ChatRequestError, safeChatError, retryDelay } from '@/lib/chat-errors';
+import { ChatRequestError, safeChatError } from '@/lib/chat-errors';
+import { useAuditTransport } from '@/lib/use-audit-transport';
 
 type Generation = 'idle' | 'thinking' | 'streaming';
 const starters = ['Show the studio-north report.', 'Show the field-notes report.', 'Which finding should I fix first?'];
 type ChatFailure = { error: Error; assistantId: string; question: string; retryAt: number };
 
 export default function AuditChat({ configured }: { configured: boolean }) {
+  const auditTransport = useAuditTransport();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
   const [generation, setGeneration] = useState<Generation>('idle');
@@ -104,9 +106,9 @@ export default function AuditChat({ configured }: { configured: boolean }) {
     const history = messages.slice(0, index).filter(message => messageContext(message).trim() && message.state !== 'error');
     const id = failure.assistantId; const question = failure.question;
     setMessages(current => current.map(message => message.id === id ? { ...message, parts: [], state: undefined, failureMessage: undefined } : message));
-    await generate(history, id, question);
+    await generate(history, id, question, true);
   }
-  async function generate(history: ChatMessage[], id: string, question: string) {
+  async function generate(history: ChatMessage[], id: string, question: string, isRetry = false) {
     if (busyRef.current) return;
     const controller = new AbortController();
     controllerRef.current = controller; activeId.current = id; busyRef.current = true;
@@ -122,14 +124,7 @@ export default function AuditChat({ configured }: { configured: boolean }) {
     };
     let failed = false;
     try {
-      const response = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: history }), signal: controller.signal });
-      if (!response.ok) {
-        const payload: unknown = await response.json().catch(() => null);
-        const message = response.status === 429 ? 'The assistant is receiving too many requests. Wait a moment, then retry this message.' : payload && typeof payload === 'object' && 'error' in payload && typeof payload.error === 'string' ? payload.error.slice(0, 350) : 'The response could not start. Please retry this message.';
-        throw new ChatRequestError(message, response.status === 429 ? retryDelay(response.headers.get('retry-after')) || 10 : 0);
-      }
-      if (!response.body || !response.headers.get('content-type')?.includes('text/event-stream')) throw new Error('The server returned an unexpected response.');
-      await consumeStream(response.body, part => {
+      await auditTransport.request(history, controller.signal, part => {
         if (!mounted.current || controller.signal.aborted) return;
         if (part.type === 'text-delta' || part.type === 'tool-update') {
           // Text and indicator transition in one React batch: no empty frame.
@@ -137,7 +132,7 @@ export default function AuditChat({ configured }: { configured: boolean }) {
           setGeneration('streaming');
         } else if (part.type === 'error') { failed = true; fail(new ChatRequestError(part.message, part.retryAfterSeconds)); }
         else if (part.type === 'finish') mark(id, 'complete');
-      }, controller.signal);
+      }, isRetry);
       if (!failed && !controller.signal.aborted) { mark(id, 'complete'); setAnnouncement('Response complete.'); }
     } catch (cause) {
       if (!mounted.current) return;
@@ -154,6 +149,7 @@ export default function AuditChat({ configured }: { configured: boolean }) {
   }
   function startNew() {
     if (busyRef.current) return;
+    auditTransport.clear();
     setMessages([]); setError(''); setFailure(null); setDraft(''); pinRef.current = true; setJumpVisible(false);
     try { localStorage.removeItem(CHAT_STORAGE_KEY); setStorageWarning(''); } catch { setStorageWarning('Browser storage could not be cleared.'); }
     inputRef.current?.focus();

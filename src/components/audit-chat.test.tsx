@@ -96,6 +96,11 @@ it('handles network failure before send, persists the retry target, and does not
   unmount(); render(<AuditChat configured/>);
   expect(screen.getByRole('button', { name: /Retry this message/ })).toBeEnabled();
   expect(screen.getByRole('alert')).toHaveTextContent('Why alt text?');
+  const success = testStream(); fetchMock.mockResolvedValueOnce(success.response);
+  await userEvent.click(screen.getByRole('button', { name: /Retry this message/ }));
+  await act(async () => { success.emit({ type: 'text-delta', delta: 'Restored retry works.' }); success.emit({ type: 'finish' }); success.close(); });
+  expect(screen.getByText('Restored retry works.')).toBeInTheDocument();
+  expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 
 it('turns malformed tool data into a readable retry error without dumping schema internals', async () => {

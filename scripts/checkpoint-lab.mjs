@@ -45,8 +45,8 @@ const server = createServer(async (request, response) => {
     response.writeHead(upstream.status, { 'Content-Type': contentType, 'Cache-Control': 'no-store' });
     if (contentType.includes('text/html')) {
       const html = await upstream.text();
-      const banner = `<div style="position:fixed;top:0;left:0;right:0;z-index:99999;padding:7px 14px;background:#403d33;color:#fff;font:12px Arial;text-align:center">LOCAL SABOTAGE LAB · ${mode || 'no fault'} · First request is interrupted; Retry contacts the real live service.</div>`;
-      response.end(html.replace('<body', '<body').replace('</body>', `${banner}</body>`));
+      const banner = `<div style="position:fixed;top:0;left:0;right:0;z-index:99999;padding:7px 14px;background:#403d33;color:#fff;font:12px Arial;text-align:center">LOCAL SABOTAGE LAB · ${mode || 'no fault'} · First request is deliberately failed/delayed; Retry contacts the real live service.</div>`;
+      response.end(html.replace('</body>', `${banner}</body>`));
     } else if (upstream.body) await pipeline(Readable.fromWeb(upstream.body), response);
     else response.end();
   } catch {

@@ -22,7 +22,7 @@ Primary flow: open /assistant → ask about a stored sample report → server-si
 
 ## Implementation notes
 
-The existing FE-06/FE-07 custom typed SSE transport is retained. It uses a client Error object and explicit per-message retry rather than useChat/regenerate. This is an intentional implementation difference from the brief's suggested hook; the equivalent user-visible behavior is tested directly, and it is not claimed to use useChat. Route failures and async chat failures are separate: error.tsx handles rendering, while chat errors render inline.
+The existing FE-06/FE-07 typed SSE wire format is retained behind an AI SDK ChatTransport adapter in src/lib/use-audit-transport.ts. useChat owns the request lifecycle and its onError Error object feeds the inline recovery card; Retry uses regenerate. The adapter sends the validated visible conversation as server context and keeps structured tool parts in the original renderer/storage format. Route failures and async chat failures are separate: error.tsx handles rendering, while chat errors render inline.
 
 Retry reconstructs context up to the original question, omits the failed assistant response, and reuses its existing message ID. It does not resend later turns or duplicate the question in the visible conversation. Retrying intentionally replaces the partial answer with a fresh answer. No retries run automatically.
 

@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.106",
+    "@ai-sdk/react": "^4.0.158",
     "ai": "^7.0.154",
     "next": "16.4.3",
     "react": "19.3.1",

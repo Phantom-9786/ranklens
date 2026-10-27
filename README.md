@@ -47,6 +47,12 @@ The AI SDK chooses and executes the tool server-side and receives its result for
 
 Verification: `npm test` covers tool validation/lookup, all four card states, stable-card updates, storage validation, stream translation, failed execution, and existing chat regressions. `npm run build` compiles strict TypeScript. [FE-07 submission instructions](docs/fe07/SUBMISSION.md).
 
+## FE-08: Checkpoint 1 recovery
+
+The primary /assistant flow now uses AI SDK `useChat` with a typed transport adapter, an Error recovery card, and `regenerate` for retrying only the failed reply. It preserves partial text after interrupted streams, prevents duplicate Retry requests, respects rate-limit waits, provides slow-response guidance and skeletons, validates tool data, and restores retryable failed conversations after reload. Route loading/error boundaries include recovery actions. Dynamic viewport units, safe-area padding, readable inputs, and 44px action targets improve small-screen use.
+
+See the [failure inventory and sabotage instructions](docs/fe08/FAILURE-INVENTORY.md). The local-only proxy deliberately interrupts requests; Retry then contacts the real live Gemini service. Production exposes no fault-injection switch. Physical iPhone Safari testing remains unverified because no real device is available in this environment.
+
 ## Architecture
 
 Next.js 16 App Router, strict TypeScript, React 19, Tailwind CSS 4 and shared design tokens in src/app/globals.css. Layouts/pages render as Server Components. Navigation, error recovery, and streaming chat use Client Components; provider calls and tool execution remain on the server.
