@@ -46,3 +46,7 @@ Feature preview: https://ranklens-git-codex-streaming-audit-chat-event-ai-fronte
 - Client: https://github.com/Phantom-9786/ranklens/blob/codex/capstone-skeleton/src/components/audit-chat.tsx
 
 Audit data remains explicitly labelled as sample fixtures; the AI interaction is real. API quota/availability are controlled by the provider. The app does not crawl websites. Requests use bounded history/output and a timeout; this public assignment demo is not a full authenticated, durable rate-limited service.
+
+## Production rollout
+
+The feature passed real-model checks on its protected branch preview before being fast-forwarded to codex/capstone-skeleton. Vercel production branch tracking and automatic domain assignment were verified. A fresh production-branch documentation commit triggers a distinct production rollout after the same feature commit was deployed on Preview; anonymous public endpoint verification is performed after it is Ready.
