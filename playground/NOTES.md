@@ -48,3 +48,9 @@ TypeScript compilation and the Vite production build pass. Component props use s
 ## Installation record
 
 The official shadcn 4.22.2 CLI generated dialog.tsx and tabs.tsx. Its generated dialog also imports button.tsx, so that was generated with the CLI too. lucide-react and class-variance-authority were installed for those generated imports; the CLI added cn and radix-ui. The initial npx invocation failed because it propagated this machine's npm allow-scripts configuration into a nested install. Running the already downloaded CLI directly with Node succeeded without changing the global npm configuration or suppressing security checks.
+
+## Owner-reported visual defect and correction
+
+The owner personally tried the custom modal with Tab, Shift+Tab, and Escape and reported that it appeared at the top-left rather than the center. Review found that Tailwind's reset removes the browser's default dialog margins. The custom stylesheet had relied on those margins. The correction explicitly sets position:fixed, inset:0, and margin:auto on the native dialog. Browser geometry after the fix placed its center within 0.1 CSS pixel of the viewport center horizontally and vertically. The tabs heading was also clarified to “Tabs: Overview, Keyboard, Focus” after the owner could not identify that example.
+
+Codex repeated the complete keyboard sequence after the correction: both modal wrap directions, Escape/opener focus, tabs arrows/Home/End/Tab to panel, and disclosure Enter/Space all passed. The owner did not claim to personally complete the tabs/disclosure checks; those were delegated to Codex. The shadcn dialog's generated fixed 50% positioning and translation avoided this particular native-dialog margin-reset issue.

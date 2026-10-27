@@ -24,3 +24,7 @@ Custom modal background controls were absent from the active accessibility tree 
 ## Learner check
 
 The browser checks above were performed by Codex. Before claiming personal keyboard testing or by-hand implementation, perform the same sequence yourself and explain the difference between roving focus, selection, and activation. No personal check by the learner is claimed yet.
+
+## Regression check after owner feedback
+
+Owner-reported top-left positioning was corrected with explicit native-dialog centering. The browser reported a 1242×625 CSS-pixel viewport and a 510×331.56 dialog, with horizontal/vertical center error below 0.1 pixel. Saved evidence: docs/centered-dialog.png. The full custom-component key sequence above was rerun successfully after the CSS/heading change. The owner personally tried the modal; the remaining regression checks were performed by Codex at their request.
