@@ -27,3 +27,11 @@ The supplied FlyRank Q&A includes explicit acceptance of Codex on 6 August and 8
 I completed FE-01 setup for RankLens, my planned SEO audit dashboard capstone. The repository includes a README, MIT license, .gitignore, and CLAUDE.md describing the planned React/TypeScript stack and conventions. I used Codex to critique the README and added clearer setup/status guidance and MVP acceptance criteria. The first three commits follow Conventional Commits. This assignment covers repository setup; the application will be scaffolded in the capstone skeleton assignment.
 
 Add the repository URL and attach the genuine screenshot before submitting. Submission and mentor acceptance are separate steps; this setup alone does not complete the full internship certificate requirements.
+
+## Saved screenshot evidence
+
+- [Codex result and commit summary](screenshots/fe-01-codex.png)
+- [Original setup file changes](screenshots/fe-01-file-changes.png)
+
+Both screenshots were supplied by the repository owner and saved without image edits.
+
